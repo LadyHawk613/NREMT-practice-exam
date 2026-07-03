@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NREMT-Style Drag & Drop Example</title>
+<style>
+  :root{
+    --bg:#0d1414; --panel:#141d1d; --panel-raised:#1a2626; --line:#2a3838;
+    --text:#e8efe9; --text-dim:#8fa39c; --amber:#e8a13a; --green:#4a9a6f; --red:#d1483f;
+    --mono:'IBM Plex Mono',Consolas,monospace; --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    min-height:100vh; display:flex; justify-content:center; padding:20px 14px 50px;
+  }
+  .app{ width:100%; max-width:520px; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:24px 20px; }
+  .badge{
+    font-family:var(--mono); font-size:10.5px; padding:4px 9px; border-radius:4px;
+    background:rgba(232,161,58,0.12); color:var(--amber); border:1px solid #8a6a33;
+    display:inline-block; margin-bottom:14px; letter-spacing:0.05em;
+  }
+  .scenario{ font-size:14px; color:var(--text-dim); line-height:1.6; margin-bottom:10px; padding-left:12px; border-left:2px solid var(--line); }
+  .question{ font-size:16.5px; font-weight:600; line-height:1.5; margin-bottom:8px; }
+  .instructions{ font-size:12.5px; color:var(--text-dim); margin-bottom:18px; font-family:var(--mono); }
+
+  .list{ position:relative; display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+
+  .item{
+    display:flex; align-items:center; gap:10px;
+    background:var(--panel-raised); border:1px solid var(--line); border-radius:6px;
+    padding:12px 12px; user-select:none; -webkit-user-select:none;
+    touch-action:none; font-size:14px; line-height:1.4;
+    transition:border-color .15s, background .15s, box-shadow .15s;
+    position:relative; z-index:1;
+  }
+  .item.placeholder{
+    border:1.5px dashed var(--amber); background:rgba(232,161,58,0.06);
+    opacity:0.6;
+  }
+  .item.dragging{
+    z-index:50; cursor:grabbing; box-shadow:0 10px 24px rgba(0,0,0,0.5);
+    border-color:var(--amber); background:#1f2d2d;
+  }
+  .item .num{
+    font-family:var(--mono); font-weight:700; font-size:12px; color:var(--text-dim);
+    border:1px solid var(--line); border-radius:4px; width:24px; height:24px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .item .grip{
+    margin-left:auto; padding-left:10px; color:var(--text-dim);
+    font-size:16px; letter-spacing:2px; cursor:grab; flex-shrink:0;
+    touch-action:none;
+  }
+  .item.dragging .grip{ cursor:grabbing; color:var(--amber); }
+  .item .label-text{ flex:1; }
+
+  .item.correct{ border-color:var(--green); background:rgba(74,154,111,0.1); }
+  .item.incorrect{ border-color:var(--red); background:rgba(209,72,63,0.1); }
+  .item.correct .num{ border-color:var(--green); color:var(--green); }
+  .item.incorrect .num{ border-color:var(--red); color:var(--red); }
+
+  button.primary{
+    width:100%; padding:14px; font-size:14.5px; font-weight:600;
+    background:var(--amber); color:#1a1206; border:none; border-radius:6px; cursor:pointer;
+  }
+  button.primary:disabled{ opacity:0.5; cursor:default; }
+  button.secondary{
+    width:100%; padding:12px; font-size:13.5px; font-weight:600; margin-top:8px;
+    background:transparent; color:var(--text); border:1px solid var(--line); border-radius:6px; cursor:pointer;
+  }
+  .feedback{
+    margin-top:16px; padding:13px 14px; border-radius:6px; font-size:13.5px; line-height:1.6;
+    display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.pass{ background:rgba(74,154,111,0.1); border:1px solid var(--green); }
+  .feedback.fail{ background:rgba(209,72,63,0.1); border:1px solid var(--red); }
+  .feedback .label{ font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; display:block; }
+  .feedback.pass .label{ color:var(--green); }
+  .feedback.fail .label{ color:var(--red); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+    <span class="badge">Drag &amp; Drop · Sequencing Item</span>
+    <div class="scenario">You are the first EMS provider on scene with an unresponsive adult found down. No one witnessed the collapse. An AED is immediately available.</div>
+    <div class="question">Drag the steps below into the correct order for your initial response.</div>
+    <div class="instructions">Press and drag any row (grip icon or anywhere on the card) to reorder. Works with mouse or touch.</div>
+
+    <div class="list" id="itemList"></div>
+
+    <button class="primary" id="submitBtn">Submit order</button>
+    <button class="secondary" id="resetBtn">Reset order</button>
+
+    <div class="feedback" id="feedback">
+      <span class="label" id="fbLabel"></span>
+      <span id="fbText"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const CORRECT_ORDER = [
+  "Check scene safety",
+  "Check responsiveness and breathing",
+  "Call for AED / activate emergency response",
+  "Begin chest compressions",
+  "Attach AED as soon as it arrives and follow prompts"
+];
+
+let items = shuffle(CORRECT_ORDER.slice());
+let submitted = false;
+
+function shuffle(arr){
+  let a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  if(JSON.stringify(a) === JSON.stringify(CORRECT_ORDER)) return shuffle(arr);
+  return a;
+}
+
+const listEl = document.getElementById('itemList');
+const submitBtn = document.getElementById('submitBtn');
+const resetBtn = document.getElementById('resetBtn');
+const feedback = document.getElementById('feedback');
+const fbLabel = document.getElementById('fbLabel');
+const fbText = document.getElementById('fbText');
+
+function render(){
+  listEl.innerHTML = '';
+  items.forEach((text, idx) => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.dataset.index = idx;
+    el.innerHTML =
+      '<span class="num">' + (idx+1) + '</span>' +
+      '<span class="label-text">' + text + '</span>' +
+      (submitted ? '' : '<span class="grip">⠿</span>');
+    if(!submitted){
+      el.addEventListener('pointerdown', onPointerDown);
+    }
+    listEl.appendChild(el);
+  });
+}
+
+/* ---------------- Pointer-based click-and-drag reordering ---------------- */
+let dragEl = null;
+let dragStartY = 0;
+let dragStartTop = 0;
+let itemHeight = 0;
+let placeholderIndex = 0;
+let siblings = [];
+
+function onPointerDown(e){
+  if(submitted) return;
+  dragEl = e.currentTarget;
+  const rect = dragEl.getBoundingClientRect();
+  const listRect = listEl.getBoundingClientRect();
+  itemHeight = rect.height + 8; // include gap
+  dragStartY = e.clientY;
+  dragStartTop = rect.top - listRect.top;
+  placeholderIndex = parseInt(dragEl.dataset.index, 10);
+
+  siblings = Array.from(listEl.children);
+  listEl.style.position = 'relative';
+  siblings.forEach((sib, i) => {
+    const r = sib.getBoundingClientRect();
+    sib.style.position = 'absolute';
+    sib.style.top = (r.top - listRect.top) + 'px';
+    sib.style.left = '0';
+    sib.style.right = '0';
+  });
+  listEl.style.height = (siblings.length * itemHeight - 8) + 'px';
+
+  dragEl.classList.add('dragging');
+  dragEl.setPointerCapture(e.pointerId);
+
+  document.addEventListener('pointermove', onPointerMove);
+  document.addEventListener('pointerup', onPointerUp);
+}
+
+function onPointerMove(e){
+  if(!dragEl) return;
+  const delta = e.clientY - dragStartY;
+  const newTop = dragStartTop + delta;
+  dragEl.style.top = newTop + 'px';
+  dragEl.style.zIndex = 50;
+
+  const currentSlot = Math.max(0, Math.min(siblings.length - 1, Math.round(newTop / itemHeight)));
+  if(currentSlot !== placeholderIndex){
+    reorderSiblings(placeholderIndex, currentSlot);
+    placeholderIndex = currentSlot;
+  }
+}
+
+function reorderSiblings(fromIdx, toIdx){
+  const moved = items.splice(fromIdx, 1)[0];
+  items.splice(toIdx, 0, moved);
+
+  // Reposition all non-dragged siblings to their new slot smoothly
+  const order = items.slice();
+  siblings.forEach(sib => {
+    if(sib === dragEl) return;
+    const text = sib.querySelector('.label-text').textContent;
+    const newIndex = order.indexOf(text);
+    sib.style.transition = 'top .15s ease';
+    sib.style.top = (newIndex * itemHeight) + 'px';
+  });
+}
+
+function onPointerUp(e){
+  if(!dragEl) return;
+  dragEl.classList.remove('dragging');
+  dragEl.releasePointerCapture(e.pointerId);
+  document.removeEventListener('pointermove', onPointerMove);
+  document.removeEventListener('pointerup', onPointerUp);
+
+  dragEl.style.transition = 'top .15s ease';
+  dragEl.style.top = (placeholderIndex * itemHeight) + 'px';
+
+  const finishedEl = dragEl;
+  dragEl = null;
+
+  setTimeout(() => {
+    listEl.style.height = '';
+    siblings.forEach(sib => {
+      sib.style.position = '';
+      sib.style.top = '';
+      sib.style.left = '';
+      sib.style.right = '';
+      sib.style.transition = '';
+      sib.style.zIndex = '';
+    });
+    render();
+  }, 160);
+}
+
+submitBtn.addEventListener('click', () => {
+  submitted = true;
+  const allCorrect = JSON.stringify(items) === JSON.stringify(CORRECT_ORDER);
+  render();
+  document.querySelectorAll('.item').forEach((el, idx) => {
+    el.classList.add(items[idx] === CORRECT_ORDER[idx] ? 'correct' : 'incorrect');
+  });
+  submitBtn.disabled = true;
+  feedback.className = 'feedback show ' + (allCorrect ? 'pass' : 'fail');
+  fbLabel.textContent = allCorrect ? 'Correct sequence' : 'Not quite right';
+  fbText.textContent = allCorrect
+    ? "That's the correct BLS sequence: scene safety, check responsiveness/breathing, activate EMS/AED request, start compressions, then attach the AED as soon as it's available."
+    : "Green rows are in the right spot; red rows aren't. Correct order: scene safety → check responsiveness/breathing → activate EMS/AED request → start compressions → attach AED when it arrives.";
+});
+
+resetBtn.addEventListener('click', () => {
+  submitted = false;
+  submitBtn.disabled = false;
+  items = shuffle(CORRECT_ORDER.slice());
+  feedback.className = 'feedback';
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
