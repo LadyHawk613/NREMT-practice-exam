@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NREMT-Basic Adaptive Practice Console</title>
+<style>
+  :root{
+    --bg:#0d1414;
+    --panel:#141d1d;
+    --panel-raised:#1a2626;
+    --line:#2a3838;
+    --text:#e8efe9;
+    --text-dim:#8fa39c;
+    --amber:#e8a13a;
+    --amber-dim:#8a6a33;
+    --red:#d1483f;
+    --green:#4a9a6f;
+    --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px 14px 60px;
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(232,161,58,0.05), transparent 45%),
+      radial-gradient(circle at 80% 100%, rgba(74,154,111,0.05), transparent 45%);
+  }
+
+  .app{ width:100%; max-width:640px; }
+
+  /* ---------- Console header strip ---------- */
+  .console-strip{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px 6px 0 0;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    color:var(--text-dim);
+  }
+  .console-strip .dot{
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--green); margin-right:6px;
+    box-shadow:0 0 6px var(--green);
+    animation:pulse 2s infinite ease-in-out;
+  }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* ---------- Screens ---------- */
+  .screen{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-top:none;
+    border-radius:0 0 6px 6px;
+    padding:28px 24px 30px;
+  }
+  .hidden{ display:none !important; }
+
+  /* ---------- Intro screen ---------- */
+  .intro-title{
+    font-size:26px; font-weight:700; letter-spacing:-0.01em;
+    margin-bottom:6px;
+  }
+  .intro-sub{
+    font-family:var(--mono); font-size:12px; color:var(--amber);
+    letter-spacing:0.08em; text-transform:uppercase; margin-bottom:22px;
+  }
+  .intro-body{ color:var(--text-dim); font-size:14.5px; line-height:1.65; margin-bottom:22px; }
+  .rules-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    margin-bottom:26px;
+  }
+  .rule-card{
+    background:var(--panel-raised);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:12px 13px;
+  }
+  .rule-card .k{ font-family:var(--mono); font-size:10px; color:var(--amber); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:5px; }
+  .rule-card .v{ font-size:13px; line-height:1.4; }
+
+  .domain-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:26px; }
+  .domain-tag{
+    font-family:var(--mono); font-size:10.5px; padding:4px 9px;
+    border:1px solid var(--line); border-radius:20px; color:var(--text-dim);
+  }
+
+  button.primary{
+    width:100%; padding:15px; font-size:15px; font-weight:600;
+    background:var(--amber); color:#1a1206; border:none; border-radius:5px;
+    cursor:pointer; font-family:var(--sans);
+    transition:filter 0.15s ease, transform 0.15s ease;
+  }
+  button.primary:hover{ filter:brightness(1.08); }
+  button.primary:active{ transform:scale(0.99); }
+  button.secondary{
+    width:100%; padding:13px; font-size:14px; font-weight:600;
+    background:transparent; color:var(--text); border:1px solid var(--line); border-radius:5px;
+    cursor:pointer; font-family:var(--sans); margin-top:10px;
+  }
+  button.secondary:hover{ border-color:var(--text-dim); }
+
+  /* ---------- Exam HUD ---------- */
+  .hud{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px; gap:10px;
+  }
+  .hud-item{ font-family:var(--mono); font-size:11.5px; color:var(--text-dim); }
+  .hud-item b{ color:var(--text); font-weight:600; }
+  .timer{
+    font-family:var(--mono); font-size:20px; font-weight:600;
+    padding:5px 12px; border-radius:5px; border:1px solid var(--line);
+    background:var(--panel-raised); min-width:64px; text-align:center;
+    transition:color 0.2s, border-color 0.2s;
+  }
+  .timer.warn{ color:var(--amber); border-color:var(--amber-dim); }
+  .timer.crit{ color:var(--red); border-color:var(--red); animation:blink 1s infinite; }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+  .progress-track{
+    height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin-bottom:22px;
+  }
+  .progress-fill{
+    height:100%; background:linear-gradient(90deg, var(--amber), var(--green));
+    transition:width 0.35s ease;
+  }
+
+  .qmeta{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .badge{
+    font-family:var(--mono); font-size:10.5px; padding:4px 9px; border-radius:4px;
+    letter-spacing:0.05em;
+  }
+  .badge.domain{ background:rgba(232,161,58,0.12); color:var(--amber); border:1px solid var(--amber-dim); }
+  .badge.diff{ background:var(--panel-raised); color:var(--text-dim); border:1px solid var(--line); }
+
+  .scenario{
+    font-size:14px; color:var(--text-dim); line-height:1.6;
+    margin-bottom:10px; padding-left:12px; border-left:2px solid var(--line);
+  }
+  .question-text{
+    font-size:17px; font-weight:600; line-height:1.5; margin-bottom:18px;
+  }
+
+  .options{ display:flex; flex-direction:column; gap:9px; margin-bottom:6px; }
+  .option{
+    display:flex; align-items:flex-start; gap:11px;
+    padding:13px 14px; border:1px solid var(--line); border-radius:6px;
+    background:var(--panel-raised); cursor:pointer; text-align:left;
+    font-family:var(--sans); font-size:14.5px; color:var(--text); line-height:1.45;
+    transition:border-color 0.15s, background 0.15s;
+  }
+  .option:hover:not(.locked){ border-color:var(--amber-dim); }
+  .option .letter{
+    font-family:var(--mono); font-weight:700; font-size:12.5px; color:var(--text-dim);
+    border:1px solid var(--line); border-radius:4px; width:22px; height:22px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;
+  }
+  .option.correct{ border-color:var(--green); background:rgba(74,154,111,0.1); }
+  .option.correct .letter{ border-color:var(--green); color:var(--green); }
+  .option.incorrect{ border-color:var(--red); background:rgba(209,72,63,0.1); }
+  .option.incorrect .letter{ border-color:var(--red); color:var(--red); }
+  .option.locked{ cursor:default; }
+  .option.dimmed{ opacity:0.45; }
+
+  .rationale-box{
+    margin-top:16px; padding:14px 15px; border-radius:6px;
+    background:var(--panel-raised); border:1px solid var(--line);
+    font-size:13.5px; line-height:1.6; color:var(--text-dim);
+    display:none;
+  }
+  .rationale-box.show{ display:block; }
+  .rationale-box .label{ font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px; display:block; }
+  .rationale-box.rc-correct .label{ color:var(--green); }
+  .rationale-box.rc-incorrect .label{ color:var(--red); }
+
+  .advance-row{ margin-top:18px; display:none; }
+  .advance-row.show{ display:block; }
+
+  /* ---------- Results screen ---------- */
+  .results-title{ font-size:22px; font-weight:700; margin-bottom:4px; }
+  .results-sub{ font-family:var(--mono); font-size:12px; color:var(--text-dim); margin-bottom:22px; }
+  .readiness-panel{
+    background:var(--panel-raised); border:1px solid var(--line); border-radius:6px;
+    padding:18px; margin-bottom:20px; text-align:center;
+  }
+  .readiness-panel .estimate{ font-family:var(--mono); font-size:34px; font-weight:700; }
+  .readiness-panel .estimate.pass{ color:var(--green); }
+  .readiness-panel .estimate.border{ color:var(--amber); }
+  .readiness-panel .estimate.risk{ color:var(--red); }
+  .readiness-panel .estimate-label{ font-size:12px; color:var(--text-dim); margin-top:4px; }
+
+  .stat-row{
+    display:flex; justify-content:space-between; padding:10px 0;
+    border-bottom:1px solid var(--line); font-size:13.5px;
+  }
+  .stat-row:last-child{ border-bottom:none; }
+  .stat-row .label{ color:var(--text-dim); }
+  .stat-row .val{ font-family:var(--mono); font-weight:600; }
+
+  .domain-breakdown{ margin-top:8px; margin-bottom:22px; }
+  .domain-row{
+    display:flex; align-items:center; gap:10px; padding:8px 0;
+  }
+  .domain-row .name{ font-size:13px; width:88px; flex-shrink:0; color:var(--text-dim); }
+  .domain-bar-track{ flex:1; height:8px; background:var(--line); border-radius:4px; overflow:hidden; }
+  .domain-bar-fill{ height:100%; border-radius:4px; }
+  .domain-row .pct{ font-family:var(--mono); font-size:12px; width:38px; text-align:right; }
+
+  .weak-list{ margin-bottom:22px; }
+  .weak-item{
+    display:flex; justify-content:space-between; padding:9px 12px;
+    background:rgba(209,72,63,0.08); border:1px solid rgba(209,72,63,0.3);
+    border-radius:5px; font-size:13px; margin-bottom:6px;
+  }
+  .strong-item{
+    display:flex; justify-content:space-between; padding:9px 12px;
+    background:rgba(74,154,111,0.08); border:1px solid rgba(74,154,111,0.3);
+    border-radius:5px; font-size:13px; margin-bottom:6px;
+  }
+
+  h3.section-h{ font-size:12px; font-family:var(--mono); text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin:22px 0 10px; }
+
+  .locked-note{
+    font-family:var(--mono); font-size:11px; color:var(--text-dim);
+    text-align:center; margin-top:14px; letter-spacing:0.02em;
+  }
+
+  @media (max-width:480px){
+    .rules-grid{ grid-template-columns:1fr; }
+    .intro-title{ font-size:22px; }
+    .question-text{ font-size:16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="console-strip">
+    <span><span class="dot"></span>EMT-B PRACTICE CONSOLE</span>
+    <span id="stripStatus">STANDBY</span>
+  </div>
+
+  <!-- INTRO SCREEN -->
+  <div class="screen" id="introScreen">
+    <div class="intro-title">NREMT-Basic Adaptive Practice</div>
+    <div class="intro-sub">50-item pool · CBT-style branching</div>
+    <p class="intro-body">
+      This session mimics the feel of computer-adaptive testing: your answers change what comes next. Answer correctly and the next item gets harder or more nuanced. Miss one and you'll get a more direct, foundational question in the same domain before moving on. Once you submit an answer, it locks — there's no going back, just like the real exam.
+    </p>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="k">Pacing</div>
+        <div class="v">60–90 sec per item, difficulty-dependent</div>
+      </div>
+      <div class="rule-card">
+        <div class="k">Session length</div>
+        <div class="v">25 questions, domain-balanced</div>
+      </div>
+      <div class="rule-card">
+        <div class="k">Navigation</div>
+        <div class="v">No backtracking once locked in</div>
+      </div>
+      <div class="rule-card">
+        <div class="k">Output</div>
+        <div class="v">Readiness estimate + weak domains</div>
+      </div>
+    </div>
+    <div class="domain-tags">
+      <span class="domain-tag">Airway</span>
+      <span class="domain-tag">Cardiology</span>
+      <span class="domain-tag">Trauma</span>
+      <span class="domain-tag">Medical</span>
+      <span class="domain-tag">Operations</span>
+      <span class="domain-tag">OB / Peds</span>
+    </div>
+    <button class="primary" id="startBtn">Begin session</button>
+  </div>
+
+  <!-- EXAM SCREEN -->
+  <div class="screen hidden" id="examScreen">
+    <div class="hud">
+      <div class="hud-item">ITEM <b id="qNum">1</b> / <span id="qTotal">25</span></div>
+      <div class="hud-item" id="abilityReadout">ABILITY <b>0.0</b></div>
+      <div class="timer" id="timerDisplay">60</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+    <div class="qmeta">
+      <span class="badge domain" id="qDomain">Trauma</span>
+      <span class="badge diff" id="qDiff">L2 · Application</span>
+    </div>
+
+    <div class="scenario" id="qScenario">Scenario text.</div>
+    <div class="question-text" id="qQuestion">Question text.</div>
+
+    <div class="options" id="qOptions"></div>
+
+    <div class="rationale-box" id="rationaleBox">
+      <span class="label" id="rationaleLabel">Correct</span>
+      <span id="rationaleText"></span>
+    </div>
+
+    <div class="advance-row" id="advanceRow">
+      <button class="primary" id="nextBtn">Next item →</button>
+    </div>
+
+    <div class="locked-note" id="lockedNote"></div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="screen hidden" id="resultsScreen">
+    <div class="results-title">Session complete</div>
+    <div class="results-sub" id="resultsMeta">25 items · domain-balanced</div>
+
+    <div class="readiness-panel">
+      <div class="estimate" id="readinessEstimate">—</div>
+      <div class="estimate-label" id="readinessLabel">Readiness estimate</div>
+    </div>
+
+    <div class="stat-row"><span class="label">Overall accuracy</span><span class="val" id="statAccuracy">—</span></div>
+    <div class="stat-row"><span class="label">Correct / Total</span><span class="val" id="statCorrect">—</span></div>
+    <div class="stat-row"><span class="label">Final ability estimate</span><span class="val" id="statAbility">—</span></div>
+    <div class="stat-row"><span class="label">Highest difficulty reached</span><span class="val" id="statMaxDiff">—</span></div>
+    <div class="stat-row"><span class="label">Avg. time per item</span><span class="val" id="statAvgTime">—</span></div>
+
+    <h3 class="section-h">Accuracy by domain</h3>
+    <div class="domain-breakdown" id="domainBreakdown"></div>
+
+    <h3 class="section-h">Focus areas</h3>
+    <div class="weak-list" id="weakList"></div>
+
+    <h3 class="section-h">Strong areas</h3>
+    <div class="weak-list" id="strongList"></div>
+
+    <button class="primary" id="restartBtn">Start new session</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   QUESTION BANK
+   ========================================================= */
+const QUESTION_BANK = [
+{id:"AW1",domain:"Airway",difficulty:1,time:60,scenario:"A responsive patient is choking and coughing forcefully.",question:"What is the correct initial action?",options:["Perform abdominal thrusts immediately","Encourage continued coughing","Sweep the mouth with a finger","Begin back blows"],correct:1,rationale:"A forceful, effective cough means the airway isn't fully obstructed. Coughing should be encouraged before any manual maneuver is attempted."},
+{id:"AW2",domain:"Airway",difficulty:1,time:60,scenario:"An unresponsive patient with no suspected trauma is not breathing adequately.",question:"Which airway maneuver is most appropriate?",options:["Jaw-thrust maneuver","Head-tilt chin-lift","Blind finger sweep","Nasopharyngeal airway only"],correct:1,rationale:"Without suspected spinal trauma, head-tilt chin-lift is the standard, fastest way to open the airway."},
+{id:"AW3",domain:"Airway",difficulty:2,time:75,scenario:"You are ventilating an unresponsive apneic patient with a bag-valve mask.",question:"Which finding best confirms adequate ventilation?",options:["Radial pulse present","Visible, symmetrical chest rise","Pink nail beds","Patient moans"],correct:1,rationale:"Visible symmetrical chest rise with each ventilation is the most direct confirmation that air is reaching the lungs."},
+{id:"AW4",domain:"Airway",difficulty:2,time:75,scenario:"A trauma patient requires an oral airway but has an intact gag reflex when you attempt insertion.",question:"What should you do?",options:["Insert it anyway and hold it in place","Remove it and use a nasopharyngeal airway instead","Force it further to suppress the reflex","Tape the mouth closed around it"],correct:1,rationale:"An intact gag reflex means the patient cannot tolerate an OPA; a nasopharyngeal airway is better tolerated in a semi-responsive patient."},
+{id:"AW5",domain:"Airway",difficulty:3,time:75,scenario:"A patient with facial trauma and suspected basilar skull fracture needs an airway adjunct.",question:"Which adjunct should be avoided?",options:["Oropharyngeal airway","Nasopharyngeal airway","Bag-valve mask","Suction catheter"],correct:1,rationale:"A nasopharyngeal airway is contraindicated with suspected basilar skull fracture due to risk of intracranial placement."},
+{id:"AW6",domain:"Airway",difficulty:3,time:75,scenario:"You are suctioning a patient's airway full of vomitus.",question:"What is the maximum suction time for an adult per attempt?",options:["5 seconds","15 seconds","30 seconds","60 seconds"],correct:1,rationale:"Suctioning is limited to about 15 seconds in adults to avoid worsening hypoxia during the procedure."},
+{id:"AW7",domain:"Airway",difficulty:4,time:90,scenario:"A patient in respiratory failure is receiving BVM ventilations. You notice the chest is not rising despite repositioning and adjunct placement.",question:"What is the most likely explanation requiring immediate correction?",options:["Mask seal is inadequate","Patient is too calm","Oxygen tank pressure is high","Patient's SpO2 was 98% earlier"],correct:0,rationale:"An inadequate mask seal is the most common, immediately correctable cause of poor chest rise despite proper positioning and adjuncts."},
+{id:"AW8",domain:"Airway",difficulty:2,time:75,scenario:"A conscious adult patient is in respiratory distress with adequate tidal volume.",question:"What is the appropriate initial oxygen delivery device?",options:["Nonrebreather mask at 12-15 LPM","Bag-valve mask with assisted ventilations","Nasal cannula at 1 LPM","No supplemental oxygen needed"],correct:0,rationale:"A conscious patient breathing adequately but in distress should receive high-flow oxygen via nonrebreather rather than assisted ventilation."},
+
+{id:"CD1",domain:"Cardiology",difficulty:1,time:60,scenario:"A 60-year-old reports crushing chest pain radiating to the left arm.",question:"What is the priority assessment finding to obtain?",options:["Blood glucose","Vital signs including pulse and blood pressure","Skin temperature only","Pupil response"],correct:1,rationale:"Vital signs, particularly pulse and blood pressure, guide immediate cardiac management decisions and detect instability."},
+{id:"CD2",domain:"Cardiology",difficulty:2,time:75,scenario:"A patient with suspected cardiac chest pain has their own prescribed nitroglycerin.",question:"Before assisting with nitroglycerin, which finding would be a contraindication?",options:["Systolic BP of 130 mmHg","Systolic BP of 90 mmHg","Pulse of 80 bpm","Pain rated 8/10"],correct:1,rationale:"Nitroglycerin causes vasodilation and can worsen hypotension; a systolic BP below about 100 mmHg is a contraindication."},
+{id:"CD3",domain:"Cardiology",difficulty:2,time:75,scenario:"You find an unresponsive adult, not breathing, with no pulse.",question:"What is the correct compression-to-ventilation ratio for single-rescuer adult CPR?",options:["15:2","30:2","5:1","10:1"],correct:1,rationale:"Current adult CPR guidelines use a 30:2 compression-to-ventilation ratio for single-rescuer resuscitation."},
+{id:"CD4",domain:"Cardiology",difficulty:3,time:75,scenario:"During CPR, the AED prompts 'no shock advised' after analysis.",question:"What should you do next?",options:["Shock anyway","Immediately resume CPR starting with compressions","Stop all care","Check for a pulse for 30 seconds before continuing"],correct:1,rationale:"When no shock is advised, CPR should resume immediately starting with compressions, with minimal interruption."},
+{id:"CD5",domain:"Cardiology",difficulty:3,time:75,scenario:"A patient in cardiac arrest has a witnessed sudden collapse and an AED is on scene.",question:"What is the correct priority sequence?",options:["Ventilate first, then attach AED","Begin compressions, attach AED as soon as available","Wait for ALS before any intervention","Check blood glucose before compressions"],correct:1,rationale:"Early compressions plus early defibrillation are the two interventions most associated with survival in witnessed sudden cardiac arrest."},
+{id:"CD6",domain:"Cardiology",difficulty:4,time:90,scenario:"A patient with a history of heart failure presents with severe dyspnea, pink frothy sputum, and jugular vein distension.",question:"This presentation is most consistent with which condition?",options:["Acute pulmonary edema","Simple asthma exacerbation","Spontaneous pneumothorax","Panic attack"],correct:0,rationale:"Frothy sputum, severe dyspnea, and JVD in a heart failure patient are classic findings of acute pulmonary edema from left heart failure."},
+{id:"CD7",domain:"Cardiology",difficulty:4,time:90,scenario:"An adult patient reports palpitations, dizziness, and a radial pulse too rapid and irregular to count accurately.",question:"What is the most appropriate EMT-level action?",options:["Have the patient perform vigorous exercise","Position of comfort, oxygen if indicated, prompt transport, and reassessment","Administer the patient's nitroglycerin regardless of BP","Delay transport until the pulse normalizes"],correct:1,rationale:"At the EMT level, dysrhythmias are managed supportively — positioning, oxygen as indicated, and prompt transport with monitoring — rather than definitively treated."},
+{id:"CD8",domain:"Cardiology",difficulty:1,time:60,scenario:"You are applying AED pads to a patient in cardiac arrest.",question:"What is an important safety step before delivering a shock?",options:["Ensure no one is touching the patient","Hold the patient's hand for comfort","Continue compressions during the shock","Remove the oxygen only after the shock"],correct:0,rationale:"Before defibrillation, all rescuers must be clear of the patient to prevent inadvertent shock transmission."},
+
+{id:"TR1",domain:"Trauma",difficulty:2,time:75,scenario:"MVC patient, unresponsive, suspected spinal injury.",question:"What is the first action?",options:["Apply oxygen","Manual cervical stabilization","Check blood pressure","Move to stretcher"],correct:1,rationale:"Manual cervical stabilization is the first priority in any suspected spinal injury to prevent further cord damage during assessment."},
+{id:"TR2",domain:"Trauma",difficulty:3,time:75,scenario:"Patient with arterial leg bleed, bright red and spurting.",question:"Best immediate intervention?",options:["Pressure dressing","Tourniquet proximal to the wound","Elevation only","Oxygen via NRB"],correct:1,rationale:"Life-threatening arterial hemorrhage that is spurting warrants immediate tourniquet application proximal to the wound."},
+{id:"TR2R",domain:"Trauma",difficulty:1,time:60,scenario:"Bleeding from the forearm, steady but not spurting.",question:"What is the first step to control this bleeding?",options:["Tourniquet","Direct pressure","Oxygen","Splint"],correct:1,rationale:"Direct pressure is the first-line control method for non-life-threatening external bleeding."},
+{id:"TR3",domain:"Trauma",difficulty:1,time:60,scenario:"A patient has an isolated, closed, non-angulated ankle injury after a fall.",question:"What is the appropriate management?",options:["Splint in the position found","Realign the joint forcefully","Apply a tourniquet","Withhold splinting until the hospital"],correct:0,rationale:"Closed extremity injuries without vascular compromise are splinted in the position found to reduce pain and prevent further injury."},
+{id:"TR4",domain:"Trauma",difficulty:2,time:75,scenario:"A patient has an open chest wound that makes a sucking sound with each breath.",question:"What is the correct initial management?",options:["Occlusive dressing sealed on three sides","Fully airtight seal on all four sides","Leave the wound completely uncovered","Pack the wound tightly with gauze"],correct:0,rationale:"A three-sided occlusive dressing allows air to escape during exhalation while preventing air entry, reducing tension pneumothorax risk."},
+{id:"TR5",domain:"Trauma",difficulty:3,time:75,scenario:"A patient with a chest wound treated with an occlusive dressing now shows worsening dyspnea, distended neck veins, and tracheal deviation.",question:"This presentation suggests which life-threatening condition?",options:["Simple pneumothorax","Tension pneumothorax","Flail chest","Pericarditis"],correct:1,rationale:"Tracheal deviation, JVD, and worsening dyspnea after a chest wound point to tension pneumothorax, a critical, time-sensitive emergency."},
+{id:"TR6",domain:"Trauma",difficulty:3,time:75,scenario:"A patient has an eviscerated abdominal injury with protruding intestines.",question:"What is the correct dressing approach?",options:["Push organs back in and dress tightly","Cover loosely with a moist, sterile dressing","Apply a dry adherent dressing directly","Leave completely uncovered for airflow"],correct:1,rationale:"Exposed abdominal organs should never be pushed back in; they are covered with a moist, sterile dressing to prevent drying and contamination."},
+{id:"TR7",domain:"Trauma",difficulty:4,time:90,scenario:"A multi-system trauma patient has a GCS of 6, irregular respirations, and a rapid, thready pulse.",question:"What is the highest transport priority decision?",options:["Immediate transport with ALS intercept if available, minimizing scene time","Complete full detailed exam on scene before moving","Wait for family to arrive before transport","Delay transport pending full vital sign trends"],correct:0,rationale:"A critically unstable trauma patient requires minimized scene time and rapid transport, with ALS intercept if it doesn't significantly delay care."},
+{id:"TR8",domain:"Trauma",difficulty:4,time:90,scenario:"You are assessing a fall victim with multiple potential injuries and limited time before transport.",question:"Which finding takes priority for immediate intervention over the others listed?",options:["Deformed, non-bleeding forearm fracture","Bruising on the flank","Absent radial pulse in an angulated leg","Small abrasion on the forehead"],correct:2,rationale:"An absent distal pulse with an angulated fracture indicates vascular compromise, which threatens limb viability and takes priority."},
+{id:"TR9",domain:"Trauma",difficulty:2,time:75,scenario:"A patient struck by a vehicle has a suspected pelvic fracture with instability on palpation.",question:"What is the correct assessment technique going forward?",options:["Repeatedly rock the pelvis to confirm instability","Palpate the pelvis only once to assess stability, then avoid further palpation","Have the patient stand to assess weight-bearing","Apply direct pressure over the fracture site"],correct:1,rationale:"The pelvis should be assessed for instability only once; repeated palpation can worsen internal bleeding and disrupt clot formation."},
+{id:"TR11",domain:"Trauma",difficulty:4,time:90,scenario:"A patient has visible bruising over the lower ribs on one side after blunt trauma, with decreasing blood pressure and increasing heart rate over your assessment.",question:"This trend most concerns you for which condition?",options:["Internal hemorrhage, likely splenic or hepatic injury","A simple contusion with no further concern","Dehydration unrelated to trauma","Normal anxiety response to the incident"],correct:0,rationale:"Blunt trauma to the lower ribs with worsening shock signs suggests internal hemorrhage from a solid organ injury such as spleen or liver."},
+
+{id:"MD1",domain:"Medical",difficulty:1,time:60,scenario:"A known diabetic patient is confused, diaphoretic, and able to swallow safely.",question:"What is the appropriate treatment if glucose is confirmed low?",options:["Oral glucose","Insulin injection","Withhold all treatment","IV fluids only"],correct:0,rationale:"For a conscious patient with a patent airway and suspected hypoglycemia, oral glucose is the appropriate EMT-level treatment."},
+{id:"MD2",domain:"Medical",difficulty:2,time:75,scenario:"A patient with a history of asthma presents with wheezing and their own prescribed metered-dose inhaler.",question:"What should you confirm before assisting with the inhaler?",options:["The patient's shoe size","That the medication is prescribed to this patient and hasn't already reached the max dose","That the patient has eaten recently","That the patient can stand independently"],correct:1,rationale:"Before assisting with any patient-prescribed medication, EMTs confirm the medication belongs to the patient and dosing limits haven't been exceeded."},
+{id:"MD3",domain:"Medical",difficulty:2,time:75,scenario:"A patient is having a generalized seizure that has been ongoing for 6 minutes without stopping.",question:"What is the priority concern?",options:["This is normal and requires no urgency","Status epilepticus — treat as a time-critical emergency","Wait 10 more minutes before acting","Restrain the patient's limbs firmly"],correct:1,rationale:"A seizure lasting more than 5 minutes or without return to baseline between seizures is status epilepticus, a time-critical emergency."},
+{id:"MD4",domain:"Medical",difficulty:3,time:75,scenario:"A patient presents with sudden facial drooping, slurred speech, and arm drift on one side.",question:"What is the priority EMS action?",options:["Delay transport to monitor symptom progression","Determine last known well time and transport promptly to an appropriate stroke center","Administer aspirin immediately","Have the patient walk to assess gait"],correct:1,rationale:"For suspected stroke, establishing last known well time and rapid transport to a stroke-capable facility are the priority actions."},
+{id:"MD5",domain:"Medical",difficulty:3,time:75,scenario:"A patient with a known severe peanut allergy has hives, facial swelling, and audible stridor after exposure.",question:"What is the priority intervention?",options:["Oral antihistamine only","Assist with the patient's epinephrine auto-injector","Position of comfort and observation only","Ice pack to the face"],correct:1,rationale:"Anaphylaxis with airway involvement (stridor) requires prompt epinephrine administration, which EMTs can assist with using a patient's auto-injector."},
+{id:"MD6",domain:"Medical",difficulty:4,time:90,scenario:"A patient with a history of opioid use is found unresponsive with pinpoint pupils and a respiratory rate of 4/min.",question:"What is the priority action before any medication administration?",options:["Assist ventilations with a bag-valve mask","Administer oral glucose","Apply a tourniquet","Perform chest compressions immediately"],correct:0,rationale:"Severe respiratory depression is the immediate life threat; airway and ventilation support takes priority over any other intervention, including naloxone."},
+{id:"MD7",domain:"Medical",difficulty:4,time:90,scenario:"A patient with a history of COPD is in severe respiratory distress, using accessory muscles, with SpO2 of 84% on room air.",question:"What is the appropriate oxygen approach?",options:["Withhold all oxygen due to COPD history","Administer supplemental oxygen titrated to improve hypoxia while monitoring respiratory status","Only allow the patient to use their home nasal cannula setting","Delay oxygen until arrival at the hospital"],correct:1,rationale:"Severe hypoxia in a COPD patient should still be treated with supplemental oxygen; the historical concern about oxygen-driven hypoventilation should never prevent treating significant hypoxia."},
+{id:"MD8",domain:"Medical",difficulty:2,time:75,scenario:"A patient reports severe abdominal pain, rigidity, and guarding on palpation.",question:"What is the appropriate EMT-level action?",options:["Palpate deeply and repeatedly to localize pain","Perform a gentle assessment, avoid deep palpation, and transport promptly","Give the patient food and water","Have the patient perform sit-ups to assess pain response"],correct:1,rationale:"With a rigid, guarded abdomen, the EMT avoids aggravating palpation and prioritizes gentle assessment and prompt transport for suspected surgical abdomen."},
+
+{id:"OP1",domain:"Ops",difficulty:1,time:60,scenario:"You arrive at a multi-vehicle collision with visible downed power lines near the wreckage.",question:"What is the priority action?",options:["Approach immediately to begin patient care","Ensure scene safety and await utility company clearance before approach","Move the power lines aside with a tool","Drive over the lines carefully"],correct:1,rationale:"Scene safety always precedes patient care; downed power lines require utility company clearance before approach."},
+{id:"OP2",domain:"Ops",difficulty:2,time:75,scenario:"You are triaging patients at a multi-casualty incident using START triage.",question:"A patient who is not breathing after airway repositioning is categorized as:",options:["Immediate (Red)","Delayed (Yellow)","Minor (Green)","Deceased/Expectant (Black)"],correct:3,rationale:"In START triage, a patient who remains apneic after repositioning the airway is categorized as deceased/expectant."},
+{id:"OP3",domain:"Ops",difficulty:2,time:75,scenario:"You suspect a patient was exposed to an unknown hazardous substance at a chemical facility.",question:"What is the correct approach before patient contact?",options:["Enter the hot zone immediately to begin treatment","Stage in the cold zone and await hazmat-trained personnel for decontamination","Move the patient yourself out of the area first","Treat through protective gloves only"],correct:1,rationale:"Untrained personnel should stage in the cold zone; hazmat-trained responders handle decontamination and hot-zone entry."},
+{id:"OP4",domain:"Ops",difficulty:3,time:75,scenario:"During transport, a combative patient with altered mental status attempts to strike you.",question:"What is the most appropriate action?",options:["Restrain the patient using excessive force to stop the behavior","Ensure your safety, use only reasonable and medically necessary restraint per protocol, and document thoroughly","Leave the patient unattended in the back","Sedate the patient with medication yourself"],correct:1,rationale:"EMTs use only reasonable, protocol-guided restraint, prioritize crew and patient safety, and thoroughly document combative behavior and interventions."},
+{id:"OP5",domain:"Ops",difficulty:3,time:75,scenario:"You are called to a scene where law enforcement has not yet secured an actively violent patient.",question:"What is the correct action?",options:["Enter and begin treatment immediately","Stage at a safe distance until law enforcement declares the scene secure","Send one crew member in alone","Wait exactly 5 minutes regardless of updates"],correct:1,rationale:"EMS should stage away from an unsecured violent scene until law enforcement confirms it is safe to enter."},
+{id:"OP6",domain:"Ops",difficulty:1,time:60,scenario:"You are documenting patient care after a call.",question:"What should a proper patient care report include?",options:["Only the treatments given","Objective findings, treatments, and patient response, without personal opinions","Personal opinions about the patient's behavior","Only the chief complaint"],correct:1,rationale:"Documentation should be objective and factual, capturing findings, treatments, and patient responses without subjective personal opinion."},
+{id:"OP7",domain:"Ops",difficulty:4,time:90,scenario:"You are first on scene at a building collapse with multiple visible patients and no additional resources yet dispatched.",question:"What is the priority action before beginning individual patient treatment?",options:["Begin treating the most severely injured patient found first","Establish incident command, request additional resources, and begin triage","Treat patients in the order they are found","Wait silently for further instructions"],correct:1,rationale:"With multiple patients and limited resources, establishing command, requesting resources, and triaging come before individual treatment to do the greatest good for the greatest number."},
+{id:"OP8",domain:"Ops",difficulty:1,time:60,scenario:"You are approaching a scene and are unsure if it is safe.",question:"What is the correct first step?",options:["Proceed and assess safety once inside","Perform a scene size-up from a safe distance before approaching","Ask the patient if it is safe","Call for backup only if injured yourself"],correct:1,rationale:"Scene size-up for safety is performed before approach, not after entering a potentially unsafe environment."},
+
+{id:"OB1",domain:"OB/Peds",difficulty:1,time:60,scenario:"A pregnant patient in active labor tells you she feels the urge to push and crowning is visible.",question:"What is the appropriate action?",options:["Transport immediately without delay for delivery","Prepare for delivery on scene","Have the patient cross her legs to delay delivery","Insert a gloved hand to stop delivery"],correct:1,rationale:"When crowning is visible and delivery is imminent, EMS should prepare for and support delivery on scene rather than attempting transport or delay."},
+{id:"OB2",domain:"OB/Peds",difficulty:2,time:75,scenario:"Immediately after delivery, the newborn is limp, blue, and not breathing.",question:"What is the priority action?",options:["Vigorously rub and stimulate, then begin ventilations if no response","Wait 5 minutes to see if the newborn improves on its own","Immediately begin chest compressions before any other step","Submerge the newborn in warm water"],correct:0,rationale:"Initial newborn resuscitation starts with drying/stimulation; if the newborn remains apneic or cyanotic, ventilations follow promptly."},
+{id:"OB3",domain:"OB/Peds",difficulty:3,time:75,scenario:"During delivery, the umbilical cord is visible in the vagina before the newborn's head.",question:"This is a cord prolapse. What is the correct EMT action?",options:["Push the cord back into the vagina","Position the mother knee-chest or Trendelenburg, keep pressure off the cord, provide oxygen, and transport rapidly","Pull gently on the cord to assist delivery","Wait for full delivery before acting"],correct:1,rationale:"For cord prolapse, the priority is relieving pressure on the cord using positioning and rapid transport, without pushing the cord back in."},
+{id:"OB4",domain:"OB/Peds",difficulty:2,time:75,scenario:"A 2-year-old has a fever, rapid breathing, and is unusually lethargic when assessed by a caregiver at home.",question:"Which finding is most concerning and requires prompt transport?",options:["Fever of 100.4°F alone","Unusual lethargy with rapid breathing","Mild runny nose","Normal skin color and playful behavior"],correct:1,rationale:"Lethargy combined with rapid breathing in a young child signals possible serious illness and warrants prompt transport and evaluation."},
+{id:"OB5",domain:"OB/Peds",difficulty:3,time:75,scenario:"An infant is found with partial airway obstruction, conscious, with a weak cry and poor color.",question:"What is the appropriate action?",options:["Encourage coughing and monitor closely, preparing to intervene if obstruction becomes complete","Perform blind finger sweeps immediately","Begin back blows and chest thrusts right away regardless of effectiveness of cough","Withhold any intervention since the infant is conscious"],correct:0,rationale:"A weak cry and poor color suggest a poor air exchange despite consciousness; close monitoring with readiness to intervene is appropriate, while blind sweeps are avoided in infants."},
+{id:"OB6",domain:"OB/Peds",difficulty:4,time:90,scenario:"A febrile toddler has a witnessed brief generalized seizure that has now stopped, and the child is now post-ictal but breathing adequately.",question:"What is the priority EMS action?",options:["Actively cool the child with ice water immersion","Maintain airway, monitor closely, and transport for evaluation of the febrile seizure","Restrain the child firmly to prevent movement","Give the child oral fluids immediately"],correct:1,rationale:"After a febrile seizure resolves, the priority is airway maintenance, monitoring, and transport for medical evaluation, not aggressive cooling or oral intake."},
+{id:"OB7",domain:"OB/Peds",difficulty:4,time:90,scenario:"A newborn delivered in the field is breathing but has a heart rate of 90 bpm after initial stimulation and drying.",question:"What is the appropriate next step?",options:["Begin chest compressions immediately","Begin positive-pressure ventilation with a bag-valve mask","No intervention needed since the newborn is breathing","Administer oxygen by blow-by only, no ventilation"],correct:1,rationale:"A newborn heart rate below 100 bpm despite stimulation warrants positive-pressure ventilation; compressions are reserved for heart rates below 60 despite adequate ventilation."},
+{id:"OB8",domain:"OB/Peds",difficulty:1,time:60,scenario:"You are assessing a healthy newborn immediately after an uncomplicated delivery.",question:"What is an expected normal finding?",options:["Strong cry and good muscle tone","No cry and complete limpness","Blue color throughout the body after 10 minutes","Heart rate of 40 bpm"],correct:0,rationale:"A strong cry and good muscle tone are expected, reassuring findings in a healthy newborn immediately after delivery."}
+];
+
+const DIFF_LABELS = {1:"L1 · Recognition", 2:"L2 · Application", 3:"L3 · Prioritization", 4:"L4 · Complex judgment"};
+const SESSION_LENGTH = 25;
+const DOMAINS = ["Airway","Cardiology","Trauma","Medical","Ops","OB/Peds"];
+const DOMAIN_COLORS = {
+  "Airway":"#4a9a6f", "Cardiology":"#d1483f", "Trauma":"#e8a13a",
+  "Medical":"#6b9ac4", "Ops":"#a17fd1", "OB/Peds":"#d17fb0"
+};
+
+/* =========================================================
+   ADAPTIVE ENGINE STATE
+   ========================================================= */
+let state = {
+  ability: 0.0,
+  usedIds: new Set(),
+  domainCount: {},
+  sequence: [],       // full log of answered items
+  currentIndex: 0,
+  currentQ: null,
+  timerInterval: null,
+  timeRemaining: 0,
+  timeStarted: null,
+  locked: false
+};
+
+function resetState(){
+  state.ability = 0.0;
+  state.usedIds = new Set();
+  state.domainCount = {};
+  DOMAINS.forEach(d => state.domainCount[d] = 0);
+  state.sequence = [];
+  state.currentIndex = 0;
+  state.currentQ = null;
+  clearInterval(state.timerInterval);
+  state.timeRemaining = 0;
+  state.locked = false;
+}
+
+function targetDifficultyForAbility(a){
+  if(a < 0.4) return [1,2];
+  if(a < 0.8) return [2,3];
+  if(a < 1.2) return [2,3,4];
+  return [3,4];
+}
+
+// pick least-used domain among those under-represented, to satisfy
+// "every 5 questions, at least 3 different domains" balancing rule
+function pickDomain(){
+  const recentWindow = state.sequence.slice(-4).map(s => s.domain);
+  const counts = {};
+  DOMAINS.forEach(d => counts[d] = state.domainCount[d]);
+  // Prefer domains not used in the recent window, weighted by lowest overall count
+  const candidates = DOMAINS.slice().sort((a,b) => counts[a]-counts[b]);
+  for(const d of candidates){
+    if(!recentWindow.includes(d)) return d;
+  }
+  return candidates[0];
+}
+
+function pickNextQuestion(prevCorrect){
+  let pool = QUESTION_BANK.filter(q => !state.usedIds.has(q.id));
+  if(pool.length === 0) return null;
+
+  // Explicit branch override for the TR1->TR2/TR2R demo pair, if present
+  if(state.currentQ){
+    if(prevCorrect === true && state.currentQ.id === "TR1"){
+      const branch = pool.find(q => q.id === "TR2");
+      if(branch) return branch;
+    }
+    if(prevCorrect === false && state.currentQ.id === "TR1"){
+      const branch = pool.find(q => q.id === "TR2R");
+      if(branch) return branch;
+    }
+  }
+
+  let targetDiffs;
+  if(prevCorrect === null){
+    targetDiffs = [2]; // baseline start
+  } else {
+    targetDiffs = targetDifficultyForAbility(state.ability);
+  }
+
+  const domain = pickDomain();
+
+  // Try: matching domain + matching difficulty
+  let candidates = pool.filter(q => q.domain === domain && targetDiffs.includes(q.difficulty));
+  // Fallback: matching domain, any difficulty
+  if(candidates.length === 0) candidates = pool.filter(q => q.domain === domain);
+  // Fallback: any domain, matching difficulty
+  if(candidates.length === 0) candidates = pool.filter(q => targetDiffs.includes(q.difficulty));
+  // Fallback: anything left
+  if(candidates.length === 0) candidates = pool;
+
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+/* =========================================================
+   DOM REFS
+   ========================================================= */
+const introScreen = document.getElementById('introScreen');
+const examScreen = document.getElementById('examScreen');
+const resultsScreen = document.getElementById('resultsScreen');
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+const nextBtn = document.getElementById('nextBtn');
+const stripStatus = document.getElementById('stripStatus');
+
+const qNum = document.getElementById('qNum');
+const qTotal = document.getElementById('qTotal');
+const abilityReadout = document.getElementById('abilityReadout');
+const timerDisplay = document.getElementById('timerDisplay');
+const progressFill = document.getElementById('progressFill');
+const qDomain = document.getElementById('qDomain');
+const qDiff = document.getElementById('qDiff');
+const qScenario = document.getElementById('qScenario');
+const qQuestion = document.getElementById('qQuestion');
+const qOptions = document.getElementById('qOptions');
+const rationaleBox = document.getElementById('rationaleBox');
+const rationaleLabel = document.getElementById('rationaleLabel');
+const rationaleText = document.getElementById('rationaleText');
+const advanceRow = document.getElementById('advanceRow');
+const lockedNote = document.getElementById('lockedNote');
+
+qTotal.textContent = SESSION_LENGTH;
+
+/* =========================================================
+   FLOW CONTROL
+   ========================================================= */
+startBtn.addEventListener('click', () => {
+  resetState();
+  introScreen.classList.add('hidden');
+  examScreen.classList.remove('hidden');
+  resultsScreen.classList.add('hidden');
+  stripStatus.textContent = 'SESSION ACTIVE';
+  loadNextQuestion(null);
+});
+
+restartBtn.addEventListener('click', () => {
+  resultsScreen.classList.add('hidden');
+  introScreen.classList.remove('hidden');
+  stripStatus.textContent = 'STANDBY';
+});
+
+nextBtn.addEventListener('click', () => {
+  const prevCorrect = state.sequence[state.sequence.length - 1].wasCorrect;
+  if(state.currentIndex >= SESSION_LENGTH){
+    showResults();
+  } else {
+    loadNextQuestion(prevCorrect);
+  }
+});
+
+function loadNextQuestion(prevCorrect){
+  if(state.currentIndex >= SESSION_LENGTH){
+    showResults();
+    return;
+  }
+  const q = pickNextQuestion(prevCorrect);
+  if(!q){
+    showResults();
+    return;
+  }
+  state.usedIds.add(q.id);
+  state.domainCount[q.domain] = (state.domainCount[q.domain] || 0) + 1;
+  state.currentQ = q;
+  state.currentIndex += 1;
+  state.locked = false;
+
+  qNum.textContent = state.currentIndex;
+  abilityReadout.innerHTML = 'ABILITY <b>' + state.ability.toFixed(1) + '</b>';
+  progressFill.style.width = ((state.currentIndex-1) / SESSION_LENGTH * 100) + '%';
+
+  qDomain.textContent = q.domain;
+  qDiff.textContent = DIFF_LABELS[q.difficulty];
+  qScenario.textContent = q.scenario;
+  qQuestion.textContent = q.question;
+
+  qOptions.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.options.forEach((optText, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = '<span class="letter">' + letters[idx] + '</span><span>' + optText + '</span>';
+    btn.addEventListener('click', () => selectAnswer(idx));
+    qOptions.appendChild(btn);
+  });
+
+  rationaleBox.className = 'rationale-box';
+  advanceRow.classList.remove('show');
+  lockedNote.textContent = '';
+
+  startTimer(q.time);
+}
+
+function startTimer(seconds){
+  clearInterval(state.timerInterval);
+  state.timeRemaining = seconds;
+  state.timeStarted = Date.now();
+  updateTimerDisplay();
+  state.timerInterval = setInterval(() => {
+    state.timeRemaining -= 1;
+    updateTimerDisplay();
+    if(state.timeRemaining <= 0){
+      clearInterval(state.timerInterval);
+      if(!state.locked) forceTimeout();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay(){
+  timerDisplay.textContent = Math.max(0, state.timeRemaining);
+  timerDisplay.classList.remove('warn','crit');
+  if(state.timeRemaining <= 10) timerDisplay.classList.add('crit');
+  else if(state.timeRemaining <= 20) timerDisplay.classList.add('warn');
+}
+
+function forceTimeout(){
+  // Treat as incorrect, no option selected
+  lockAnswer(-1);
+}
+
+function selectAnswer(idx){
+  if(state.locked) return;
+  lockAnswer(idx);
+}
+
+function lockAnswer(selectedIdx){
+  state.locked = true;
+  clearInterval(state.timerInterval);
+  const q = state.currentQ;
+  const wasCorrect = selectedIdx === q.correct;
+  const timeUsed = q.time - state.timeRemaining;
+
+  const optionEls = qOptions.querySelectorAll('.option');
+  optionEls.forEach((el, idx) => {
+    el.classList.add('locked');
+    if(idx === q.correct) el.classList.add('correct');
+    else if(idx === selectedIdx) el.classList.add('incorrect');
+    else el.classList.add('dimmed');
+  });
+
+  rationaleBox.classList.add('show');
+  rationaleBox.classList.remove('rc-correct','rc-incorrect');
+  if(wasCorrect){
+    rationaleBox.classList.add('rc-correct');
+    rationaleLabel.textContent = 'Correct';
+    state.ability = Math.min(2.0, state.ability + 0.2);
+  } else {
+    rationaleBox.classList.add('rc-incorrect');
+    rationaleLabel.textContent = selectedIdx === -1 ? 'Time expired — marked incorrect' : 'Incorrect';
+    state.ability = Math.max(-1.0, state.ability - 0.2);
+  }
+  rationaleText.textContent = q.rationale;
+
+  state.sequence.push({
+    id: q.id, domain: q.domain, difficulty: q.difficulty,
+    wasCorrect: wasCorrect, timeUsed: timeUsed, timeAllotted: q.time,
+    selectedIdx: selectedIdx
+  });
+
+  abilityReadout.innerHTML = 'ABILITY <b>' + state.ability.toFixed(1) + '</b>';
+  progressFill.style.width = (state.currentIndex / SESSION_LENGTH * 100) + '%';
+
+  advanceRow.classList.add('show');
+  nextBtn.textContent = state.currentIndex >= SESSION_LENGTH ? 'View results →' : 'Next item →';
+  lockedNote.textContent = 'Response locked — no backtracking.';
+}
+
+/* =========================================================
+   RESULTS
+   ========================================================= */
+function showResults(){
+  examScreen.classList.add('hidden');
+  resultsScreen.classList.remove('hidden');
+  stripStatus.textContent = 'SESSION COMPLETE';
+
+  const total = state.sequence.length;
+  const correctCount = state.sequence.filter(s => s.wasCorrect).length;
+  const accuracy = total ? (correctCount / total * 100) : 0;
+  const maxDiffReached = Math.max(...state.sequence.map(s => s.difficulty), 0);
+  const avgTime = total ? (state.sequence.reduce((sum,s) => sum + s.timeUsed, 0) / total) : 0;
+
+  document.getElementById('resultsMeta').textContent = total + ' items answered · domain-balanced session';
+  document.getElementById('statAccuracy').textContent = accuracy.toFixed(0) + '%';
+  document.getElementById('statCorrect').textContent = correctCount + ' / ' + total;
+  document.getElementById('statAbility').textContent = state.ability.toFixed(1);
+  document.getElementById('statMaxDiff').textContent = 'L' + maxDiffReached;
+  document.getElementById('statAvgTime').textContent = avgTime.toFixed(0) + 's';
+
+  const estimateEl = document.getElementById('readinessEstimate');
+  const labelEl = document.getElementById('readinessLabel');
+  estimateEl.classList.remove('pass','border','risk');
+  if(state.ability >= 0.8 && accuracy >= 70){
+    estimateEl.textContent = 'LIKELY READY';
+    estimateEl.classList.add('pass');
+    labelEl.textContent = 'Ability and accuracy both trending strong';
+  } else if(state.ability >= 0.3 && accuracy >= 55){
+    estimateEl.textContent = 'BORDERLINE';
+    estimateEl.classList.add('border');
+    labelEl.textContent = 'Solid foundation — target weak domains below';
+  } else {
+    estimateEl.textContent = 'NEEDS REVIEW';
+    estimateEl.classList.add('risk');
+    labelEl.textContent = 'Focus review time before attempting a full exam';
+  }
+
+  // Domain breakdown
+  const domainStats = {};
+  DOMAINS.forEach(d => domainStats[d] = {correct:0, total:0});
+  state.sequence.forEach(s => {
+    domainStats[s.domain].total += 1;
+    if(s.wasCorrect) domainStats[s.domain].correct += 1;
+  });
+
+  const breakdownEl = document.getElementById('domainBreakdown');
+  breakdownEl.innerHTML = '';
+  DOMAINS.forEach(d => {
+    const stat = domainStats[d];
+    if(stat.total === 0) return;
+    const pct = (stat.correct / stat.total * 100);
+    const row = document.createElement('div');
+    row.className = 'domain-row';
+    row.innerHTML =
+      '<span class="name">' + d + '</span>' +
+      '<div class="domain-bar-track"><div class="domain-bar-fill" style="width:' + pct + '%; background:' + DOMAIN_COLORS[d] + '"></div></div>' +
+      '<span class="pct">' + pct.toFixed(0) + '%</span>';
+    breakdownEl.appendChild(row);
+  });
+
+  // Weak / strong areas
+  const weakListEl = document.getElementById('weakList');
+  const strongListEl = document.getElementById('strongList');
+  weakListEl.innerHTML = '';
+  strongListEl.innerHTML = '';
+
+  const attempted = DOMAINS.filter(d => domainStats[d].total > 0);
+  const ranked = attempted.map(d => ({
+    domain: d,
+    pct: domainStats[d].correct / domainStats[d].total * 100,
+    total: domainStats[d].total
+  })).sort((a,b) => a.pct - b.pct);
+
+  const weak = ranked.filter(r => r.pct < 65);
+  const strong = ranked.filter(r => r.pct >= 80);
+
+  if(weak.length === 0){
+    weakListEl.innerHTML = '<div style="font-size:13px;color:var(--text-dim);">No domains fell below 65% this session — solid spread.</div>';
+  } else {
+    weak.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'weak-item';
+      item.innerHTML = '<span>' + r.domain + '</span><span>' + r.pct.toFixed(0) + '% (' + r.total + ' items)</span>';
+      weakListEl.appendChild(item);
+    });
+  }
+
+  if(strong.length === 0){
+    strongListEl.innerHTML = '<div style="font-size:13px;color:var(--text-dim);">Keep going — no domain has hit 80%+ yet.</div>';
+  } else {
+    strong.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'strong-item';
+      item.innerHTML = '<span>' + r.domain + '</span><span>' + r.pct.toFixed(0) + '% (' + r.total + ' items)</span>';
+      strongListEl.appendChild(item);
+    });
+  }
+}
+</script>
+</body>
+</html>
