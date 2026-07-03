@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NREMT Multiple Choice Practice</title>
+<style>
+  :root{
+    --bg:#0d1414; --panel:#141d1d; --panel-raised:#1a2626; --line:#2a3838;
+    --text:#e8efe9; --text-dim:#8fa39c; --amber:#e8a13a; --green:#4a9a6f; --red:#d1483f;
+    --mono:
+      'IBM Plex Mono',
+      Consolas,
+      monospace;
+    --sans:
+      'IBM Plex Sans',
+      -apple-system,
+      sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px 14px 50px;
+  }
+  .app{ width:100%; max-width:520px; margin-bottom: 30px; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:24px 20px; }
+  .badge{
+    font-family:var(--mono); font-size:10.5px; padding:4px 9px; border-radius:4px;
+    background:rgba(232,161,58,0.12); color:var(--amber); border:1px solid #8a6a33;
+    display:inline-block; margin-bottom:14px; letter-spacing:0.05em;
+  }
+  .scenario{ font-size:14px; color:var(--text-dim); line-height:1.6; margin-bottom:10px; padding-left:12px; border-left:2px solid var(--line); }
+  .question-text{ font-size:16.5px; font-weight:600; line-height:1.5; margin-bottom:15px; }
+  .options-list{
+    display:flex; flex-direction:column; gap:10px; margin-bottom:20px;
+  }
+  .option-item{
+    background:var(--panel-raised); border:1px solid var(--line); border-radius:6px;
+    padding:12px 15px; user-select:none; cursor:pointer;
+    transition:border-color .15s, background .15s;
+    display:flex; align-items:center;
+  }
+  .option-item:hover:not(.selected):not(.correct):not(.incorrect){
+    border-color:var(--amber);
+  }
+  .option-item.selected{
+    border-color:var(--amber); background:rgba(232,161,58,0.06);
+  }
+  .option-item.correct{
+    border-color:var(--green); background:rgba(74,154,111,0.1);
+  }
+  .option-item.incorrect{
+    border-color:var(--red); background:rgba(209,72,63,0.1);
+  }
+  .option-item input[type="radio"]{
+    margin-right:10px;
+    accent-color: var(--amber);
+  }
+  .option-item.correct input[type="radio"]{
+    accent-color: var(--green);
+  }
+  .option-item.incorrect input[type="radio"]{
+    accent-color: var(--red);
+  }
+
+  button.primary{
+    width:100%; padding:14px; font-size:14.5px; font-weight:600;
+    background:var(--amber); color:#1a1206; border:none; border-radius:6px; cursor:pointer;
+  }
+  button.primary:disabled{ opacity:0.5; cursor:default; }
+  button.secondary{
+    width:100%; padding:12px; font-size:13.5px; font-weight:600; margin-top:8px;
+    background:transparent; color:var(--text); border:1px solid var(--line); border-radius:6px; cursor:pointer;
+  }
+  .feedback{
+    margin-top:16px; padding:13px 14px; border-radius:6px; font-size:13.5px; line-height:1.6;
+    display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.pass{ background:rgba(74,154,111,0.1); border:1px solid var(--green); }
+  .feedback.fail{ background:rgba(209,72,63,0.1); border:1px solid var(--red); }
+  .feedback .label{ font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; display:block; }
+  .feedback.pass .label{ color:var(--green); }
+  .feedback.fail .label{ color:var(--red); }
+</style>
+</head>
+<body>
+
+<div id="questions-container"></div>
+
+<script>
+const questions = [
+  {
+    id: 'mcq1',
+    scenario: "A 68-year-old male complains of sudden onset of crushing chest pain radiating to his left arm. He is pale, diaphoretic, and states he feels 'like an elephant is sitting on my chest'. His vital signs are BP 140/90, HR 100, RR 20, SpO2 96% on room air.",
+    question: "What is the MOST appropriate initial intervention for this patient?",
+    options: [
+      "Administer aspirin 324 mg orally.",
+      "Administer nitroglycerin sublingually.",
+      "Assist with continuous positive airway pressure (CPAP).",
+      "Prepare for immediate defibrillation."
+    ],
+    correctAnswerIndex: 0,
+    feedbackCorrect: "Administering aspirin is a critical initial intervention for suspected myocardial infarction, as it helps prevent further clot formation. Nitroglycerin can be given after aspirin if blood pressure allows, and CPAP is for respiratory distress, not primary cardiac chest pain. Defibrillation is for cardiac arrest with a shockable rhythm.",
+    feedbackIncorrect: "The most appropriate initial intervention is to administer aspirin. Aspirin inhibits platelet aggregation and can reduce mortality in acute coronary syndromes. While nitroglycerin may be indicated, aspirin is typically given first. CPAP is for respiratory compromise, and defibrillation is for specific cardiac arrest rhythms."
+  },
+  {
+    id: 'mcq2',
+    scenario: "You respond to a 2-year-old child who is experiencing a seizure. The child has a fever of 103°F (39.4°C) and has been seizing for approximately 5 minutes. The parents state this is the first time this has happened.",
+    question: "What is your PRIMARY concern and intervention for this patient?",
+    options: [
+      "Administer oral glucose to rule out hypoglycemia.",
+      "Initiate rapid cooling measures to reduce the fever.",
+      "Ensure a patent airway and protect the child from injury.",
+      "Transport immediately without further intervention."
+    ],
+    correctAnswerIndex: 2,
+    feedbackCorrect: "Ensuring a patent airway and protecting the child from injury are the primary concerns during an active seizure. While fever is the cause, immediate cooling is not the first priority, and oral glucose is inappropriate for an actively seizing patient. Transport is important, but basic airway and safety interventions come first.",
+    feedbackIncorrect: "The primary concern is always airway management and patient safety during a seizure. While the fever is the likely cause, protecting the child from injury and maintaining an open airway are immediate priorities. Oral glucose is contraindicated in an unconscious patient, and rapid transport should follow initial stabilization."
+  },
+  {
+    id: 'mcq3',
+    scenario: "A 45-year-old construction worker has a large piece of rebar impaled through his left thigh. There is moderate bleeding around the entry site. The patient is conscious and anxious.",
+    question: "What is the MOST appropriate management for the impaled object?",
+    options: [
+      "Carefully remove the rebar to control bleeding.",
+      "Stabilize the rebar in place and control external bleeding.",
+      "Apply a tourniquet proximal to the impaled object.",
+      "Pack the wound with sterile gauze and apply direct pressure."
+    ],
+    correctAnswerIndex: 1,
+    feedbackCorrect: "Impaled objects should generally be stabilized in place to prevent further internal damage and control external bleeding. Removing the object can cause significant additional trauma and hemorrhage. A tourniquet might be considered for uncontrolled hemorrhage, but stabilization is the initial priority. Packing the wound is part of bleeding control but doesn't address the impaled object itself.",
+    feedbackIncorrect: "The most appropriate management for an impaled object is to stabilize it in place. Removing it can cause severe hemorrhage and further injury. While bleeding control is important, it should be done around the stabilized object. A tourniquet is a last resort for uncontrolled life-threatening hemorrhage."
+  }
+];
+
+function NREMTMultipleChoiceQuestion(questionData) {
+  const container = document.getElementById('questions-container');
+  const questionHtml = `
+    <div class="app">
+      <div class="card">
+        <span class="badge">Multiple Choice · NREMT Practice</span>
+        <div class="scenario">${questionData.scenario}</div>
+        <div class="question-text">${questionData.question}</div>
+        <div class="options-list" id="options-list-${questionData.id}"></div>
+
+        <button class="primary" id="submitBtn-${questionData.id}">Submit Answer</button>
+        <button class="secondary" id="resetBtn-${questionData.id}">Reset Question</button>
+
+        <div class="feedback" id="feedback-${questionData.id}">
+          <span class="label" id="fbLabel-${questionData.id}"></span>
+          <span id="fbText-${questionData.id}"></span>
+        </div>
+      </div>
+    </div>
+  `;
+  container.insertAdjacentHTML('beforeend', questionHtml);
+
+  const optionsListEl = document.getElementById(`options-list-${questionData.id}`);
+  const submitBtn = document.getElementById(`submitBtn-${questionData.id}`);
+  const resetBtn = document.getElementById(`resetBtn-${questionData.id}`);
+  const feedbackEl = document.getElementById(`feedback-${questionData.id}`);
+  const fbLabelEl = document.getElementById(`fbLabel-${questionData.id}`);
+  const fbTextEl = document.getElementById(`fbText-${questionData.id}`);
+
+  let selectedOptionIndex = -1;
+  let submitted = false;
+
+  function renderOptions() {
+    optionsListEl.innerHTML = '';
+    questionData.options.forEach((option, index) => {
+      const optionItem = document.createElement('label');
+      optionItem.className = 'option-item';
+      optionItem.innerHTML = `
+        <input type="radio" name="${questionData.id}" value="${index}" ${selectedOptionIndex === index ? 'checked' : ''} ${submitted ? 'disabled' : ''}>
+        ${option}
+      `;
+      if (submitted) {
+        if (index === questionData.correctAnswerIndex) {
+          optionItem.classList.add('correct');
+        } else if (index === selectedOptionIndex) {
+          optionItem.classList.add('incorrect');
+        }
+      } else if (index === selectedOptionIndex) {
+        optionItem.classList.add('selected');
+      }
+      optionItem.addEventListener('click', () => {
+        if (!submitted) {
+          selectedOptionIndex = index;
+          renderOptions();
+        }
+      });
+      optionsListEl.appendChild(optionItem);
+    });
+    submitBtn.disabled = selectedOptionIndex === -1 || submitted;
+  }
+
+  submitBtn.addEventListener('click', () => {
+    if (selectedOptionIndex === -1) return;
+    submitted = true;
+    renderOptions();
+    submitBtn.disabled = true;
+    resetBtn.style.display = 'block';
+
+    const isCorrect = selectedOptionIndex === questionData.correctAnswerIndex;
+    feedbackEl.className = `feedback show ${isCorrect ? 'pass' : 'fail'}`;
+    fbLabelEl.textContent = isCorrect ? 'Correct Answer' : 'Incorrect Answer';
+    fbTextEl.textContent = isCorrect ? questionData.feedbackCorrect : questionData.feedbackIncorrect;
+  });
+
+  resetBtn.addEventListener('click', () => {
+    selectedOptionIndex = -1;
+    submitted = false;
+    feedbackEl.className = 'feedback';
+    resetBtn.style.display = 'none';
+    renderOptions();
+  });
+
+  renderOptions();
+  resetBtn.style.display = 'none'; // Hide reset button initially
+}
+
+// Initialize all questions
+questions.forEach(q => new NREMTMultipleChoiceQuestion(q));
+</script>
+</body>
+</html>
