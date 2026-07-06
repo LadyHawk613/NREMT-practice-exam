@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NREMT Multiple Choice Practice</title>
+<style>
+  :root{
+    --bg:#0d1414; --panel:#141d1d; --panel-raised:#1a2626; --line:#2a3838;
+    --text:#e8efe9; --text-dim:#8fa39c; --amber:#e8a13a; --green:#4a9a6f; --red:#d1483f;
+    --mono:
+      'IBM Plex Mono',
+      Consolas,
+      monospace;
+    --sans:
+      'IBM Plex Sans',
+      -apple-system,
+      sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px 14px 50px;
+  }
+  .app{ width:100%; max-width:520px; margin-bottom: 30px; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:24px 20px; }
+  .badge{
+    font-family:var(--mono); font-size:10.5px; padding:4px 9px; border-radius:4px;
+    background:rgba(232,161,58,0.12); color:var(--amber); border:1px solid #8a6a33;
+    display:inline-block; margin-bottom:14px; letter-spacing:0.05em;
+  }
+  .scenario{ font-size:14px; color:var(--text-dim); line-height:1.6; margin-bottom:10px; padding-left:12px; border-left:2px solid var(--line); }
+  .question-text{ font-size:16.5px; font-weight:600; line-height:1.5; margin-bottom:15px; }
+  .options-list{
+    display:flex; flex-direction:column; gap:10px; margin-bottom:20px;
+  }
+  .option-item{
+    background:var(--panel-raised); border:1px solid var(--line); border-radius:6px;
+    padding:12px 15px; user-select:none; cursor:pointer;
+    transition:border-color .15s, background .15s;
+    display:flex; align-items:center;
+  }
+  .option-item:hover:not(.selected):not(.correct):not(.incorrect){
+    border-color:var(--amber);
+  }
+  .option-item.selected{
+    border-color:var(--amber); background:rgba(232,161,58,0.06);
+  }
+  .option-item.correct{
+    border-color:var(--green); background:rgba(74,154,111,0.1);
+  }
+  .option-item.incorrect{
+    border-color:var(--red); background:rgba(209,72,63,0.1);
+  }
+  .option-item input[type="radio"]{
+    margin-right:10px;
+    accent-color: var(--amber);
+  }
+  .option-item.correct input[type="radio"]{
+    accent-color: var(--green);
+  }
+  .option-item.incorrect input[type="radio"]{
+    accent-color: var(--red);
+  }
+
+  button.primary{
+    width:100%; padding:14px; font-size:14.5px; font-weight:600;
+    background:var(--amber); color:#1a1206; border:none; border-radius:6px; cursor:pointer;
+  }
+  button.primary:disabled{ opacity:0.5; cursor:default; }
+  button.secondary{
+    width:100%; padding:12px; font-size:13.5px; font-weight:600; margin-top:8px;
+    background:transparent; color:var(--text); border:1px solid var(--line); border-radius:6px; cursor:pointer;
+  }
+  .feedback{
+    margin-top:16px; padding:13px 14px; border-radius:6px; font-size:13.5px; line-height:1.6;
+    display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.pass{ background:rgba(74,154,111,0.1); border:1px solid var(--green); }
+  .feedback.fail{ background:rgba(209,72,63,0.1); border:1px solid var(--red); }
+  .feedback .label{ font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; display:block; }
+  .feedback.pass .label{ color:var(--green); }
+  .feedback.fail .label{ color:var(--red); }
+</style>
+</head>
+<body>
+
+<div id="questions-container"></div>
+
+<script>
+const questions = [
+  {
+    "id": "mcq5",
+    "scenario": "You are treating a 22-year-old male who was struck in the head with a baseball bat. He initially lost consciousness, regained it, and is now becoming increasingly lethargic. His right pupil is dilated and sluggish to respond to light.",
+    "question": "What pathophysiological process is MOST likely occurring, and what is the appropriate intervention?",
+    "options": [
+      "Subdural hematoma; administer high-flow oxygen and transport.",
+      "Epidural hematoma; elevate the head of the bed 30 degrees and hyperventilate if signs of herniation are present.",
+      "Concussion; monitor closely and transport non-emergently.",
+      "Diffuse axonal injury; administer IV fluids to maintain blood pressure."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The classic 'lucid interval' followed by rapid deterioration and a blown pupil is indicative of an epidural hematoma. Elevating the head of the bed 30 degrees helps reduce intracranial pressure. Hyperventilation (to a target EtCO2 of 30-35 mmHg) is only indicated if signs of active herniation (like the blown pupil) are present.",
+    "feedbackIncorrect": "A subdural hematoma typically has a slower onset. A concussion does not present with a lucid interval followed by rapid deterioration and a blown pupil. Diffuse axonal injury is a severe, widespread brain injury that typically presents with immediate and prolonged unconsciousness. The lucid interval is the key differentiator here."
+  },
+  {
+    "id": "mcq6",
+    "scenario": "A 70-year-old male with a history of COPD presents with severe respiratory distress. He is using accessory muscles, has a barrel chest, and is speaking in 1-2 word sentences. His SpO2 is 88% on room air, and you hear diffuse wheezing on auscultation.",
+    "question": "Which of the following interventions is MOST appropriate for this patient?",
+    "options": [
+      "Administer high-flow oxygen via non-rebreather mask at 15 L/min.",
+      "Administer albuterol via nebulizer and consider CPAP.",
+      "Assist ventilations with a bag-valve mask (BVM) immediately.",
+      "Administer epinephrine via auto-injector."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "This patient is experiencing a severe COPD exacerbation. Albuterol is a bronchodilator that will help relieve the wheezing. CPAP is highly effective in COPD exacerbations by reducing the work of breathing and improving oxygenation. High-flow oxygen alone may not address the bronchospasm.",
+    "feedbackIncorrect": "While oxygen is needed, high-flow oxygen via NRB without bronchodilators or positive pressure may not be sufficient and can sometimes worsen hypercapnia in severe COPD. BVM ventilation is indicated if the patient is in respiratory failure or arrest, but he is still conscious and breathing, making CPAP a better choice. Epinephrine is typically reserved for anaphylaxis or severe asthma unresponsive to other treatments."
+  },
+  {
+    "id": "mcq7",
+    "scenario": "You are assessing a 30-year-old female who is 32 weeks pregnant. She complains of a sudden onset of painless, bright red vaginal bleeding. Her vital signs are stable.",
+    "question": "What is the MOST likely cause of her bleeding, and what is the appropriate management?",
+    "options": [
+      "Placenta previa; transport on her left side and monitor for shock.",
+      "Abruptio placentae; rapid transport and prepare for delivery.",
+      "Uterine rupture; administer high-flow oxygen and rapid transport.",
+      "Ectopic pregnancy; treat for shock and rapid transport."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "Painless, bright red vaginal bleeding in the third trimester is the hallmark sign of placenta previa. Transporting the patient on her left side (left lateral recumbent position) prevents supine hypotensive syndrome. Monitoring for shock is crucial as bleeding can be significant.",
+    "feedbackIncorrect": "Abruptio placentae typically presents with painful, dark red vaginal bleeding and a rigid abdomen. Uterine rupture is rare and usually presents with severe tearing pain and signs of shock. Ectopic pregnancy typically occurs in the first trimester, not the third."
+  },
+  {
+    "id": "mcq8",
+    "scenario": "A 45-year-old male is found unresponsive in a closed garage with a running vehicle. He is cyanotic and has a respiratory rate of 6 breaths per minute. His SpO2 reads 100%.",
+    "question": "What is the MOST critical intervention for this patient, and why is the SpO2 reading misleading?",
+    "options": [
+      "Administer naloxone; the SpO2 is misleading due to poor perfusion.",
+      "Remove the patient from the environment and administer high-flow oxygen; pulse oximeters cannot differentiate between oxygen and carbon monoxide bound to hemoglobin.",
+      "Initiate CPR immediately; the SpO2 is misleading because the patient is in cardiac arrest.",
+      "Administer albuterol; the SpO2 is misleading due to bronchospasm."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "This is a classic presentation of carbon monoxide (CO) poisoning. The most critical intervention is removing the patient from the toxic environment and administering high-flow oxygen. Standard pulse oximeters cannot distinguish between oxyhemoglobin and carboxyhemoglobin, leading to falsely high SpO2 readings in CO poisoning.",
+    "feedbackIncorrect": "Naloxone is for opioid overdose, not CO poisoning. While the patient has a low respiratory rate, he is not in cardiac arrest (yet), so CPR is not the immediate first step; airway and oxygenation are. Albuterol is for bronchospasm, which is not the primary issue here."
+  },
+  {
+    "id": "mcq9",
+    "scenario": "You are treating a 60-year-old female with a history of heart failure. She presents with severe shortness of breath, pink frothy sputum, and crackles (rales) in all lung fields. Her blood pressure is 210/110.",
+    "question": "What is the primary pathophysiological cause of her symptoms, and what is the most appropriate intervention?",
+    "options": [
+      "Right-sided heart failure; administer high-flow oxygen and transport.",
+      "Left-sided heart failure (pulmonary edema); administer nitroglycerin and consider CPAP.",
+      "Pneumonia; administer albuterol and CPAP.",
+      "Pulmonary embolism; administer high-flow oxygen and rapid transport."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The presentation of severe shortness of breath, pink frothy sputum, and crackles, combined with severe hypertension, is classic for acute pulmonary edema secondary to left-sided heart failure. Nitroglycerin reduces preload and afterload, decreasing the workload on the heart. CPAP helps push fluid out of the alveoli and improves oxygenation.",
+    "feedbackIncorrect": "Right-sided heart failure typically presents with peripheral edema and jugular vein distention (JVD), not pulmonary edema. Pneumonia typically presents with fever and localized lung sounds, not pink frothy sputum and severe hypertension. Pulmonary embolism presents with clear lung sounds or localized wheezing/crackles, not diffuse crackles and pink frothy sputum."
+  },
+  {
+    "id": "mcq10",
+    "scenario": "A 25-year-old male was involved in a high-speed motor vehicle collision. He is confused, pale, and diaphoretic. His vital signs are BP 80/60, HR 130, RR 28. His abdomen is rigid and tender.",
+    "question": "What type of shock is this patient MOST likely experiencing, and what is the primary treatment goal?",
+    "options": [
+      "Cardiogenic shock; administer fluid boluses to increase blood pressure.",
+      "Neurogenic shock; administer vasopressors to increase vascular tone.",
+      "Hypovolemic (hemorrhagic) shock; rapid transport to a trauma center and permissive hypotension.",
+      "Septic shock; administer broad-spectrum antibiotics and fluid boluses."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The patient's mechanism of injury, signs of poor perfusion (pale, diaphoretic, confused), tachycardia, hypotension, and rigid abdomen strongly suggest internal bleeding leading to hypovolemic (hemorrhagic) shock. The primary goal is rapid transport to a trauma center for surgical intervention. Permissive hypotension (maintaining a systolic BP around 80-90 mmHg) is often preferred to avoid dislodging clots.",
+    "feedbackIncorrect": "Cardiogenic shock is caused by pump failure, not trauma. Neurogenic shock typically presents with hypotension and bradycardia (or normal heart rate) and warm, dry skin below the level of injury. Septic shock is caused by infection, not trauma."
+  },
+  {
+    "id": "mcq11",
+    "scenario": "You are assessing a 4-year-old child who presents with a sudden onset of high fever, drooling, and a muffled voice. The child is sitting in a tripod position and appears very anxious.",
+    "question": "What is the MOST likely diagnosis, and what action should you AVOID?",
+    "options": [
+      "Croup; avoid administering albuterol.",
+      "Epiglottitis; avoid inspecting the airway with a tongue blade.",
+      "Asthma; avoid administering oxygen.",
+      "Foreign body airway obstruction; avoid back blows."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The classic triad of drooling, dysphagia (difficulty swallowing), and distress, along with a high fever and tripod positioning, is indicative of epiglottitis. You must AVOID inspecting the airway with a tongue blade or any other instrument, as this can cause severe laryngospasm and complete airway obstruction.",
+    "feedbackIncorrect": "Croup typically presents with a low-grade fever and a 'seal-bark' cough, not drooling. Asthma presents with wheezing, not drooling or a muffled voice. While a foreign body could cause drooling, the high fever points to an infectious process like epiglottitis."
+  },
+  {
+    "id": "mcq12",
+    "scenario": "A 50-year-old male with a history of diabetes presents with altered mental status. His skin is cool and clammy. His blood glucose level is 35 mg/dL. He is unable to swallow.",
+    "question": "What is the MOST appropriate intervention for this patient?",
+    "options": [
+      "Administer oral glucose paste between his cheek and gum.",
+      "Administer glucagon intramuscularly.",
+      "Administer 50% dextrose (D50) intravenously.",
+      "Administer insulin subcutaneously."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The patient is severely hypoglycemic and unable to swallow, making oral glucose contraindicated due to the risk of aspiration. The most appropriate and rapid intervention for a patient with an altered mental status and an intact IV line (or the ability to establish one) is intravenous 50% dextrose (D50).",
+    "feedbackIncorrect": "Oral glucose is contraindicated in patients who cannot swallow. Glucagon can be used if IV access cannot be obtained, but D50 is preferred for its rapid onset. Insulin would worsen the hypoglycemia."
+  },
+  {
+    "id": "mcq13",
+    "scenario": "You are treating a 30-year-old female who was stung by a bee. She is experiencing severe respiratory distress, facial swelling, and diffuse hives. Her blood pressure is 80/50.",
+    "question": "What is the primary pathophysiological mechanism causing her hypotension, and what is the first-line medication?",
+    "options": [
+      "Hypovolemia due to fluid loss; administer IV fluids.",
+      "Vasodilation and increased capillary permeability; administer epinephrine.",
+      "Bronchospasm; administer albuterol.",
+      "Cardiac pump failure; administer dopamine."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The patient is experiencing anaphylaxis. The hypotension is caused by massive vasodilation and increased capillary permeability (fluid leaking out of the blood vessels) due to the release of histamine and other mediators. Epinephrine is the first-line medication because it causes vasoconstriction (reversing hypotension) and bronchodilation (relieving respiratory distress).",
+    "feedbackIncorrect": "While fluid shifts occur, the primary cause of hypotension is vasodilation, not absolute hypovolemia. Albuterol addresses bronchospasm but not the life-threatening hypotension or upper airway swelling. Anaphylaxis is a distributive shock, not cardiogenic shock."
+  },
+  {
+    "id": "mcq14",
+    "scenario": "A 75-year-old female presents with sudden onset of right-sided weakness and expressive aphasia. Her symptoms started 45 minutes ago. Her vital signs are stable.",
+    "question": "What is the MOST critical piece of information to obtain, and what is the appropriate destination?",
+    "options": [
+      "A list of her current medications; transport to the closest hospital.",
+      "The exact time she was last known well; transport to a primary or comprehensive stroke center.",
+      "Her blood glucose level; transport to a trauma center.",
+      "Her history of previous strokes; transport to a cardiac center."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The patient is exhibiting signs of an acute ischemic stroke. The most critical piece of information is the exact time she was 'last known well,' as this determines her eligibility for thrombolytic therapy (tPA) or endovascular thrombectomy. She must be transported to a designated stroke center capable of providing these treatments.",
+    "feedbackIncorrect": "While medications are important, the 'last known well' time is the primary determinant for acute stroke treatment. Blood glucose should be checked to rule out hypoglycemia (which can mimic a stroke), but the destination should be a stroke center, not a trauma center. A cardiac center is not the appropriate destination for a stroke."
+  },
+  {
+    "id": "mcq15",
+    "scenario": "You are assessing a 20-year-old male who was stabbed in the right side of his chest. He is in severe respiratory distress, has absent breath sounds on the right side, and his trachea is deviated to the left. His blood pressure is 70/40.",
+    "question": "What is the MOST likely diagnosis, and what is the immediate life-saving intervention?",
+    "options": [
+      "Open pneumothorax; apply an occlusive dressing.",
+      "Tension pneumothorax; perform needle pleural decompression.",
+      "Massive hemothorax; administer IV fluids.",
+      "Cardiac tamponade; perform pericardiocentesis."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The combination of severe respiratory distress, absent breath sounds on one side, tracheal deviation to the opposite side, and hypotension (obstructive shock) is the classic presentation of a tension pneumothorax. The immediate life-saving intervention is needle pleural decompression to relieve the pressure in the chest cavity.",
+    "feedbackIncorrect": "An open pneumothorax would present with a sucking chest wound, and while an occlusive dressing is needed, the signs of tension (tracheal deviation, hypotension) require decompression. A massive hemothorax presents with dullness to percussion and flat neck veins, not typically tracheal deviation. Cardiac tamponade presents with muffled heart tones, JVD, and narrowing pulse pressure (Beck's triad)."
+  },
+  {
+    "id": "mcq16",
+    "scenario": "A 65-year-old male with a history of renal failure missed his last two dialysis appointments. He presents with profound weakness, bradycardia (HR 40), and peaked T waves on the ECG.",
+    "question": "What electrolyte imbalance is MOST likely causing his symptoms, and what is a potential prehospital treatment?",
+    "options": [
+      "Hypokalemia; administer potassium chloride.",
+      "Hypercalcemia; administer normal saline.",
+      "Hyperkalemia; administer calcium chloride or calcium gluconate.",
+      "Hyponatremia; administer hypertonic saline."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Missed dialysis leads to the accumulation of potassium in the blood (hyperkalemia). Classic ECG changes for hyperkalemia include peaked T waves, widened QRS complexes, and bradycardia. Calcium chloride or calcium gluconate is administered to stabilize the cardiac cell membrane and prevent lethal arrhythmias.",
+    "feedbackIncorrect": "Hypokalemia typically presents with U waves and flattened T waves. Hypercalcemia and hyponatremia do not typically present with this specific combination of missed dialysis, bradycardia, and peaked T waves."
+  },
+  {
+    "id": "mcq17",
+    "scenario": "You are treating a 10-month-old infant who has had severe diarrhea and vomiting for 3 days. The infant is lethargic, has sunken eyes, a sunken fontanelle, and delayed capillary refill (>4 seconds).",
+    "question": "What is the MOST appropriate fluid resuscitation strategy for this patient?",
+    "options": [
+      "Administer a 20 mL/kg bolus of normal saline.",
+      "Administer a 10 mL/kg bolus of 5% dextrose in water (D5W).",
+      "Encourage oral rehydration with an electrolyte solution.",
+      "Administer a 50 mL/kg bolus of lactated Ringer's."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "The infant is showing signs of severe dehydration and hypovolemic shock. The standard fluid resuscitation bolus for pediatric patients in shock is 20 mL/kg of an isotonic crystalloid (like normal saline or lactated Ringer's).",
+    "feedbackIncorrect": "D5W is not an appropriate resuscitation fluid for hypovolemic shock as it rapidly leaves the intravascular space. Oral rehydration is insufficient for severe dehydration with altered mental status. A 50 mL/kg bolus is too large for an initial bolus and could cause fluid overload."
+  },
+  {
+    "id": "mcq18",
+    "scenario": "A 40-year-old female presents with sudden onset of severe, sharp pain in her right upper quadrant that radiates to her right shoulder. The pain started shortly after eating a greasy meal. She is nauseated and has vomited once.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Appendicitis",
+      "Cholecystitis",
+      "Pancreatitis",
+      "Peptic ulcer disease"
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Pain in the right upper quadrant that radiates to the right shoulder, especially after a fatty meal, is classic for cholecystitis (inflammation of the gallbladder).",
+    "feedbackIncorrect": "Appendicitis typically presents with periumbilical pain that migrates to the right lower quadrant. Pancreatitis typically presents with severe epigastric pain radiating to the back. Peptic ulcer disease typically presents with burning epigastric pain that may improve or worsen with eating."
+  },
+  {
+    "id": "mcq19",
+    "scenario": "You are assessing a patient who was involved in a blast injury. The patient has no obvious external trauma but is coughing up blood and complaining of severe chest pain. Which mechanism of blast injury is MOST likely responsible for these findings?",
+    "options": [
+      "Primary blast injury",
+      "Secondary blast injury",
+      "Tertiary blast injury",
+      "Quaternary blast injury"
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "Primary blast injuries are caused by the pressure wave of the blast itself and primarily affect hollow organs, such as the lungs (causing pulmonary contusions or 'blast lung', leading to hemoptysis), eardrums, and gastrointestinal tract.",
+    "feedbackIncorrect": "Secondary blast injuries are caused by flying debris (shrapnel). Tertiary blast injuries are caused by the patient being thrown by the blast wind. Quaternary blast injuries include burns, crush injuries, and toxic exposures."
+  },
+  {
+    "id": "mcq20",
+    "scenario": "A 28-year-old pregnant female (38 weeks gestation) is experiencing a seizure. Her husband states she has been complaining of a severe headache and visual disturbances for the past two days. She has no history of seizures.",
+    "question": "What is the MOST likely diagnosis, and what is the definitive treatment?",
+    "options": [
+      "Epilepsy; administer diazepam.",
+      "Preeclampsia; administer magnesium sulfate.",
+      "Eclampsia; administer magnesium sulfate and prepare for delivery.",
+      "Gestational diabetes; administer 50% dextrose."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The presence of a seizure in a pregnant patient with a history of headache and visual disturbances (signs of preeclampsia) indicates she has progressed to eclampsia. The definitive treatment for eclampsia is magnesium sulfate to control the seizures and expedited delivery of the fetus.",
+    "feedbackIncorrect": "Epilepsy is unlikely given the lack of history and the presence of preeclamptic symptoms. Preeclampsia is the precursor to eclampsia (which is defined by the onset of seizures). Gestational diabetes does not typically cause seizures unless there is severe hypoglycemia, which is less likely than eclampsia in this presentation."
+  },
+  {
+    "id": "mcq21",
+    "scenario": "You are treating a patient with a suspected spinal cord injury at the level of C6. The patient is hypotensive (BP 80/50), bradycardic (HR 50), and has warm, flushed skin below the level of the injury.",
+    "question": "What type of shock is this patient experiencing, and what is the primary pathophysiological cause?",
+    "options": [
+      "Hypovolemic shock; loss of blood volume.",
+      "Cardiogenic shock; failure of the heart muscle.",
+      "Neurogenic shock; loss of sympathetic nervous system tone.",
+      "Septic shock; systemic inflammatory response to infection."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The patient is experiencing neurogenic shock, a type of distributive shock caused by a high spinal cord injury (typically above T6). The injury disrupts the sympathetic nervous system, leading to a loss of vascular tone (vasodilation, causing warm/flushed skin and hypotension) and unopposed parasympathetic tone (causing bradycardia).",
+    "feedbackIncorrect": "Hypovolemic shock presents with tachycardia and cool, pale, diaphoretic skin. Cardiogenic shock presents with tachycardia (usually) and signs of heart failure. Septic shock presents with tachycardia and a history of infection."
+  },
+  {
+    "id": "mcq22",
+    "scenario": "A 60-year-old male complains of a sudden, severe headache that he describes as 'the worst headache of my life.' He is photophobic and has a stiff neck. His vital signs are BP 190/100, HR 90, RR 16.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Migraine headache",
+      "Tension headache",
+      "Subarachnoid hemorrhage",
+      "Ischemic stroke"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "A sudden, severe headache described as the 'worst headache of my life' (thunderclap headache), accompanied by photophobia and nuchal rigidity (stiff neck), is the classic presentation of a subarachnoid hemorrhage, often due to a ruptured cerebral aneurysm.",
+    "feedbackIncorrect": "Migraines and tension headaches typically have a more gradual onset and a history of similar headaches. An ischemic stroke typically presents with focal neurological deficits (e.g., unilateral weakness, aphasia) rather than a sudden, severe headache and meningeal signs."
+  },
+  {
+    "id": "mcq23",
+    "scenario": "You are called to a nursing home for an 80-year-old female with a history of dementia. She is lethargic, has a fever of 102\u00b0F, and her urine in the catheter bag is dark and cloudy. Her vital signs are BP 85/50, HR 110, RR 24.",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital treatment?",
+    "options": [
+      "Hypovolemic shock; administer oral fluids.",
+      "Septic shock; administer IV fluid boluses.",
+      "Cardiogenic shock; administer dopamine.",
+      "Neurogenic shock; administer epinephrine."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The patient has signs of a severe infection (fever, cloudy urine indicating a UTI) and signs of shock (hypotension, tachycardia, altered mental status). This is indicative of septic shock. The primary prehospital treatment is aggressive IV fluid resuscitation to support blood pressure and perfusion.",
+    "feedbackIncorrect": "While she may be dehydrated, the presence of infection points to septic shock, and oral fluids are insufficient for shock. Cardiogenic and neurogenic shock do not fit the clinical picture of infection."
+  },
+  {
+    "id": "mcq24",
+    "scenario": "A 35-year-old male was exposed to a dry chemical powder at an industrial site. He is complaining of burning pain on his arms where the powder is visible.",
+    "question": "What is the FIRST step in managing this chemical exposure?",
+    "options": [
+      "Immediately flush the area with copious amounts of water.",
+      "Brush the dry powder off the skin before flushing with water.",
+      "Apply a neutralizing agent to the chemical.",
+      "Cover the area with a moist sterile dressing."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For dry chemical exposures, the first step is always to brush off as much of the dry powder as possible before applying water. Adding water to some dry chemicals can create an exothermic (heat-producing) reaction, worsening the burn.",
+    "feedbackIncorrect": "Flushing immediately without brushing can worsen the burn. Neutralizing agents are generally not recommended in the prehospital setting as the neutralization process can also produce heat. A moist dressing would have the same effect as flushing with water."
+  },
+  {
+    "id": "mcq25",
+    "scenario": "You are assessing a patient with a suspected traumatic brain injury. The patient opens his eyes to pain, uses inappropriate words, and withdraws from painful stimuli.",
+    "question": "What is this patient's Glasgow Coma Scale (GCS) score?",
+    "options": [
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The GCS is calculated as follows: Eyes open to pain = 2. Verbal response is inappropriate words = 3. Motor response is withdrawal from pain = 4. Total GCS = 2 + 3 + 4 = 9.",
+    "feedbackIncorrect": "A score of 7, 8, or 10 would result from different combinations of responses. For example, GCS 8 could be Eyes to pain (2), Incomprehensible sounds (2), Withdraws from pain (4)."
+  },
+  {
+    "id": "mcq26",
+    "scenario": "A 50-year-old male presents with severe, tearing abdominal pain that radiates to his back. He has a pulsatile mass in his abdomen. His blood pressure is 80/50, and his heart rate is 120.",
+    "question": "What is the MOST likely diagnosis, and what is the appropriate management?",
+    "options": [
+      "Appendicitis; administer pain medication and transport.",
+      "Ruptured abdominal aortic aneurysm (AAA); rapid transport and permissive hypotension.",
+      "Kidney stones; administer IV fluids and transport.",
+      "Pancreatitis; administer antiemetics and transport."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The classic triad of severe tearing abdominal/back pain, a pulsatile abdominal mass, and hypotension is indicative of a ruptured abdominal aortic aneurysm (AAA). This is a surgical emergency requiring rapid transport. Permissive hypotension is used to avoid increasing pressure and worsening the hemorrhage.",
+    "feedbackIncorrect": "Appendicitis, kidney stones, and pancreatitis do not present with a pulsatile abdominal mass and profound hemorrhagic shock."
+  },
+  {
+    "id": "mcq27",
+    "scenario": "You are treating a patient who has been exposed to an organophosphate nerve agent. The patient is experiencing salivation, lacrimation, urination, defecation, GI upset, and emesis (SLUDGE syndrome).",
+    "question": "What is the primary antidote for this exposure?",
+    "options": [
+      "Naloxone",
+      "Atropine",
+      "Glucagon",
+      "Sodium bicarbonate"
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Organophosphates inhibit acetylcholinesterase, leading to an overabundance of acetylcholine and overstimulation of the parasympathetic nervous system (SLUDGE syndrome). Atropine is an anticholinergic medication that blocks the effects of acetylcholine, serving as the primary antidote.",
+    "feedbackIncorrect": "Naloxone is for opioid overdose. Glucagon is for hypoglycemia or beta-blocker overdose. Sodium bicarbonate is for tricyclic antidepressant overdose or severe acidosis."
+  },
+  {
+    "id": "mcq28",
+    "scenario": "A 22-year-old female is hyperventilating due to a panic attack. She complains of numbness and tingling in her fingers and around her mouth, and her hands are cramping (carpopedal spasm).",
+    "question": "What is the primary pathophysiological cause of her symptoms?",
+    "options": [
+      "Respiratory acidosis due to retaining carbon dioxide.",
+      "Respiratory alkalosis due to blowing off too much carbon dioxide.",
+      "Metabolic acidosis due to lactic acid buildup.",
+      "Metabolic alkalosis due to vomiting."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Hyperventilation causes the patient to exhale excessive amounts of carbon dioxide (CO2). CO2 is an acid, so losing too much leads to respiratory alkalosis. This alkalosis causes a shift in calcium, leading to hypocalcemia, which produces the numbness, tingling, and carpopedal spasms.",
+    "feedbackIncorrect": "Respiratory acidosis occurs with hypoventilation (retaining CO2). Metabolic acidosis and alkalosis are caused by metabolic processes (e.g., diabetic ketoacidosis, vomiting), not primary changes in ventilation."
+  },
+  {
+    "id": "mcq29",
+    "scenario": "You are assessing a newborn immediately after delivery. The infant has a heart rate of 90, weak respiratory effort, some flexion of extremities, a grimace when stimulated, and a pink body with blue extremities.",
+    "question": "What is the infant's APGAR score?",
+    "options": [
+      "4",
+      "5",
+      "6",
+      "7"
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "APGAR scoring: Appearance = 1 (pink body, blue extremities/acrocyanosis). Pulse = 1 (HR < 100). Grimace = 1 (grimace to stimulation). Activity = 1 (some flexion). Respiration = 1 (weak effort). Total = 1 + 1 + 1 + 1 + 1 = 5.",
+    "feedbackIncorrect": "Scores of 4, 6, or 7 would require different findings (e.g., HR > 100 would give a Pulse score of 2, active motion would give an Activity score of 2)."
+  },
+  {
+    "id": "mcq30",
+    "scenario": "A 45-year-old male was involved in a house fire and sustained full-thickness burns to his entire anterior torso and both entire arms.",
+    "question": "Using the Rule of Nines, what percentage of his total body surface area (TBSA) is burned?",
+    "options": [
+      "27%",
+      "36%",
+      "45%",
+      "54%"
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "According to the Rule of Nines for an adult: Anterior torso = 18%. Each entire arm = 9% (so two arms = 18%). Total TBSA burned = 18% + 18% = 36%.",
+    "feedbackIncorrect": "27% would be anterior torso (18%) + one arm (9%). 45% would be anterior torso (18%) + both arms (18%) + head (9%). 54% would be anterior torso (18%) + both arms (18%) + both legs (18%)."
+  },
+  {
+    "id": "mcq31",
+    "scenario": "You are treating a patient with a suspected tension pneumothorax. You perform a needle pleural decompression. Which of the following indicates that the procedure was SUCCESSFUL?",
+    "options": [
+      "A sudden drop in blood pressure.",
+      "An increase in resistance when ventilating with a BVM.",
+      "A rush of air and an improvement in blood pressure and respiratory distress.",
+      "The development of jugular vein distention (JVD)."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "A successful needle decompression of a tension pneumothorax will result in a rush of air escaping from the pleural space, relieving the pressure on the heart and lungs. This leads to an immediate improvement in venous return, cardiac output (improved blood pressure), and respiratory distress.",
+    "feedbackIncorrect": "A drop in blood pressure, increased resistance to ventilation, and development of JVD are signs of a worsening tension pneumothorax, not a successful decompression."
+  },
+  {
+    "id": "mcq32",
+    "scenario": "A 60-year-old male with a history of alcoholism presents with vomiting bright red blood. He is hypotensive and tachycardic. He has no history of abdominal pain.",
+    "question": "What is the MOST likely cause of his hematemesis?",
+    "options": [
+      "Peptic ulcer disease",
+      "Esophageal varices",
+      "Gastroenteritis",
+      "Diverticulitis"
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Painless vomiting of bright red blood (hematemesis) in a patient with a history of alcoholism (which leads to liver cirrhosis and portal hypertension) is the classic presentation of ruptured esophageal varices.",
+    "feedbackIncorrect": "Peptic ulcer disease typically presents with abdominal pain and 'coffee-ground' emesis (partially digested blood). Gastroenteritis presents with nausea, vomiting, and diarrhea, but typically not massive hematemesis. Diverticulitis presents with lower left quadrant pain and lower GI bleeding (hematochezia), not hematemesis."
+  },
+  {
+    "id": "mcq35",
+    "scenario": "You are assessing a patient with a history of chronic alcohol abuse who presents with severe epigastric pain radiating to the back, nausea, and vomiting. He has a distended abdomen with some tenderness.",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital concern?",
+    "options": [
+      "Cholecystitis; pain management.",
+      "Appendicitis; surgical consultation.",
+      "Pancreatitis; fluid resuscitation and pain management.",
+      "Gastritis; antiemetics."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Severe epigastric pain radiating to the back, especially in a patient with a history of alcohol abuse, is highly suggestive of pancreatitis. The primary prehospital concerns are aggressive fluid resuscitation to combat third-spacing of fluids and effective pain management.",
+    "feedbackIncorrect": "Cholecystitis pain is typically in the right upper quadrant and may radiate to the right shoulder. Appendicitis pain is typically in the right lower quadrant. Gastritis is inflammation of the stomach lining and usually presents with less severe pain."
+  },
+  {
+    "id": "mcq36",
+    "scenario": "A 70-year-old male is found unresponsive. His family states he has a history of diabetes and takes insulin. His blood glucose is 40 mg/dL. You have established IV access.",
+    "question": "What is the MOST appropriate next intervention?",
+    "options": [
+      "Administer 1 mg Glucagon IM.",
+      "Administer 25 grams Dextrose 50% IV.",
+      "Administer 10 grams Dextrose 10% IV.",
+      "Administer oral glucose paste."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For an unresponsive adult with confirmed hypoglycemia and established IV access, the most appropriate intervention is 25 grams of Dextrose 50% IV. This provides a rapid increase in blood glucose. If D50 is not available or too hypertonic for the vein, D10 can be used in larger volumes.",
+    "feedbackIncorrect": "Glucagon is used when IV access cannot be established. Dextrose 10% would require a larger volume to deliver 25 grams of dextrose. Oral glucose is contraindicated in an unresponsive patient due to aspiration risk."
+  },
+  {
+    "id": "mcq37",
+    "scenario": "You are called to a construction site for a 30-year-old male who has sustained an open fracture of the tibia and fibula with significant bleeding. The bone is protruding through the skin.",
+    "question": "What is the MOST appropriate initial management for this injury?",
+    "options": [
+      "Attempt to reduce the fracture and splint the extremity.",
+      "Cover the open wound with a sterile dressing, apply direct pressure, and splint the extremity in the position found.",
+      "Apply a tourniquet immediately proximal to the injury.",
+      "Irrigate the wound with saline and then cover with a sterile dressing."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For an open fracture, the priority is to control bleeding and prevent further contamination. Cover the wound with a sterile dressing, apply direct pressure to control bleeding, and splint the extremity in the position found. Do not attempt to reduce an open fracture in the prehospital setting.",
+    "feedbackIncorrect": "Attempting to reduce an open fracture can cause further damage and contamination. A tourniquet is reserved for uncontrolled, life-threatening hemorrhage. Irrigation is typically done in the hospital setting."
+  },
+  {
+    "id": "mcq38",
+    "scenario": "A 6-month-old infant presents with a sudden onset of inconsolable crying, drawing legs to the chest, and currant jelly stools. The infant is lethargic between episodes of crying.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Gastroenteritis",
+      "Appendicitis",
+      "Intussusception",
+      "Pyloric stenosis"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The classic triad of sudden, severe, intermittent abdominal pain (inconsolable crying with legs drawn to chest), and currant jelly stools (blood and mucus) in an infant is highly indicative of intussusception, a telescoping of the bowel.",
+    "feedbackIncorrect": "Gastroenteritis presents with vomiting and diarrhea, but typically not currant jelly stools or intermittent severe pain. Appendicitis is rare in infants and typically presents with localized abdominal pain. Pyloric stenosis presents with projectile vomiting, usually between 2-8 weeks of age."
+  },
+  {
+    "id": "mcq39",
+    "scenario": "You are assessing a patient with a history of schizophrenia who is experiencing an acute psychotic episode. The patient is agitated, hallucinating, and threatening violence.",
+    "question": "What is the MOST appropriate initial approach to managing this patient?",
+    "options": [
+      "Immediately restrain the patient to ensure safety.",
+      "Engage in a calm, reassuring manner, and attempt verbal de-escalation while ensuring scene safety.",
+      "Confront the patient about their hallucinations to bring them back to reality.",
+      "Administer a sedative without attempting verbal de-escalation."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The initial approach to an agitated or psychotic patient should always prioritize verbal de-escalation in a calm, reassuring manner, while ensuring the safety of both the patient and the EMS crew. Restraints should be a last resort. Confronting hallucinations can worsen agitation.",
+    "feedbackIncorrect": "Immediate restraint can escalate the situation. Confronting hallucinations is generally ineffective and can increase agitation. Administering sedatives without attempting verbal de-escalation first is not the preferred initial approach."
+  },
+  {
+    "id": "mcq40",
+    "scenario": "A 60-year-old male with a history of diabetes and hypertension presents with sudden onset of left-sided facial droop, slurred speech, and weakness in his left arm. His blood glucose is 180 mg/dL.",
+    "question": "What is the MOST likely type of stroke, and what is the critical time window for definitive treatment?",
+    "options": [
+      "Hemorrhagic stroke; 24 hours.",
+      "Ischemic stroke; 3 hours (up to 4.5 hours in some cases) for thrombolytics.",
+      "Transient ischemic attack (TIA); 6 hours.",
+      "Subarachnoid hemorrhage; 12 hours."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The sudden onset of focal neurological deficits (facial droop, slurred speech, unilateral weakness) is characteristic of an ischemic stroke. The critical time window for administering thrombolytic therapy (tPA) is 3 hours from symptom onset, which can be extended to 4.5 hours in select patients.",
+    "feedbackIncorrect": "Hemorrhagic stroke also presents with sudden neurological deficits but often with a severe headache. TIAs resolve spontaneously within 24 hours. Subarachnoid hemorrhage presents with a thunderclap headache. The time windows for these are different."
+  },
+  {
+    "id": "mcq41",
+    "scenario": "You are treating a patient with a severe allergic reaction. After administering epinephrine, the patient's condition improves, but then they begin to worsen again with recurrent bronchospasm and hypotension.",
+    "question": "What is this phenomenon called, and what is the appropriate next step?",
+    "options": [
+      "Epinephrine rebound; administer diphenhydramine.",
+      "Biphasic anaphylaxis; administer a second dose of epinephrine.",
+      "Anaphylactic shock; administer IV fluids.",
+      "Refractory anaphylaxis; administer corticosteroids."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "This is a classic presentation of biphasic anaphylaxis, where symptoms recur hours after initial resolution, even without re-exposure to the allergen. The appropriate next step is to administer a second dose of epinephrine, as epinephrine is the cornerstone of anaphylaxis treatment.",
+    "feedbackIncorrect": "Epinephrine rebound is not a recognized phenomenon. While IV fluids are important for anaphylactic shock, epinephrine is the primary treatment for the underlying pathophysiology. Corticosteroids are used to prevent biphasic reactions but are not the immediate treatment for recurrent symptoms."
+  },
+  {
+    "id": "mcq42",
+    "scenario": "A 24-year-old male presents with sudden onset of severe, sharp, pleuritic chest pain and shortness of breath. He is tall and thin and has no significant medical history. On auscultation, breath sounds are diminished on the right side.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Acute myocardial infarction",
+      "Pulmonary embolism",
+      "Spontaneous pneumothorax",
+      "Pericarditis"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden onset of pleuritic chest pain and shortness of breath with diminished breath sounds on one side, especially in a tall, thin male without significant medical history, is highly suggestive of a spontaneous pneumothorax (collapsed lung).",
+    "feedbackIncorrect": "AMI typically presents with crushing substernal pain. Pulmonary embolism can cause pleuritic chest pain and shortness of breath, but often with clear lung sounds or localized wheezing. Pericarditis presents with sharp chest pain that is often relieved by leaning forward."
+  },
+  {
+    "id": "mcq43",
+    "scenario": "You are assessing a patient with a history of chronic kidney disease who is on dialysis. He presents with generalized weakness, fatigue, and pale skin. His blood pressure is 100/60, and his heart rate is 110.",
+    "question": "What is the MOST likely cause of his symptoms?",
+    "options": [
+      "Hyperkalemia",
+      "Hypoglycemia",
+      "Anemia",
+      "Fluid overload"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Patients with chronic kidney disease often develop anemia due to decreased erythropoietin production by the kidneys. Anemia leads to decreased oxygen-carrying capacity, causing generalized weakness, fatigue, and pallor. The tachycardia is a compensatory mechanism.",
+    "feedbackIncorrect": "Hyperkalemia would present with ECG changes and potentially bradycardia. Hypoglycemia would present with altered mental status and diaphoresis. Fluid overload would present with signs like crackles, JVD, and peripheral edema."
+  },
+  {
+    "id": "mcq44",
+    "scenario": "A 4-year-old child has ingested an unknown quantity of a caustic cleaning solution. The child is crying, has burns around the mouth, and is drooling.",
+    "question": "What is the MOST important prehospital intervention?",
+    "options": [
+      "Induce vomiting to remove the substance.",
+      "Administer activated charcoal.",
+      "Dilute the substance with milk or water.",
+      "Ensure airway patency and rapid transport."
+    ],
+    "correctAnswerIndex": 3,
+    "feedbackCorrect": "For caustic ingestions, the primary concern is airway compromise due to swelling. Inducing vomiting or administering activated charcoal is contraindicated as it can cause further damage to the esophagus and airway. Dilution is controversial and should only be done with medical direction. Ensuring airway patency and rapid transport are paramount.",
+    "feedbackIncorrect": "Inducing vomiting is contraindicated for caustic ingestions. Activated charcoal is not effective for caustic substances. Dilution is controversial and should only be done under medical direction. Airway management and rapid transport are the priorities."
+  },
+  {
+    "id": "mcq45",
+    "scenario": "You are assessing a patient with a suspected tension pneumothorax. You have performed a needle decompression, but the patient's condition has not improved. What is the MOST likely reason for this?",
+    "options": [
+      "The needle was inserted too low.",
+      "The needle was inserted too medially.",
+      "The needle was not long enough to reach the pleural space.",
+      "The patient actually has a massive hemothorax."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "If a needle decompression does not improve the patient's condition, a common reason is that the needle was not long enough to penetrate the chest wall and visceral pleura to reach the pleural space. This is especially true in obese patients or those with significant muscle mass.",
+    "feedbackIncorrect": "Inserting the needle too low or too medially could cause other complications but wouldn't necessarily prevent decompression if the pleural space was reached. While a massive hemothorax can mimic some signs of tension pneumothorax, the lack of improvement after a properly placed needle decompression points to a technical failure of the procedure."
+  },
+  {
+    "id": "mcq46",
+    "scenario": "A 55-year-old male with a history of diabetes is found unresponsive. His blood glucose is 600 mg/dL. His skin is warm and dry, and his breath has a fruity odor. He is breathing deeply and rapidly (Kussmaul respirations).",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital intervention?",
+    "options": [
+      "Hypoglycemia; administer D50 IV.",
+      "Hyperosmolar Hyperglycemic State (HHS); administer insulin.",
+      "Diabetic Ketoacidosis (DKA); administer IV fluids.",
+      "Lactic acidosis; administer sodium bicarbonate."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The patient's presentation (high blood glucose, warm/dry skin, fruity breath, Kussmaul respirations) is classic for Diabetic Ketoacidosis (DKA). The primary prehospital intervention is aggressive IV fluid resuscitation to correct dehydration and improve perfusion. Insulin is administered in the hospital setting.",
+    "feedbackIncorrect": "Hypoglycemia would present with cool/clammy skin and a low blood glucose. HHS also presents with very high blood glucose and dehydration but typically without Kussmaul respirations or fruity breath. Lactic acidosis is a different metabolic derangement."
+  },
+  {
+    "id": "mcq47",
+    "scenario": "You are treating a patient with a suspected ruptured ectopic pregnancy. The patient is a 28-year-old female complaining of sudden, severe, unilateral lower abdominal pain. She is pale, diaphoretic, and hypotensive.",
+    "question": "What is the MOST critical prehospital intervention?",
+    "options": [
+      "Administer pain medication.",
+      "Administer IV fluids to treat hypovolemic shock.",
+      "Perform a rapid vaginal exam to assess for bleeding.",
+      "Transport rapidly to a facility with surgical capabilities."
+    ],
+    "correctAnswerIndex": 3,
+    "feedbackCorrect": "A ruptured ectopic pregnancy is a life-threatening condition due to internal hemorrhage. While IV fluids are important, the definitive treatment is surgical. Therefore, rapid transport to a facility with surgical capabilities is the most critical prehospital intervention. Vaginal exams should be avoided in suspected ectopic pregnancy.",
+    "feedbackIncorrect": "Pain medication is secondary to life threats. While IV fluids are important, they are not definitive. A vaginal exam is contraindicated in suspected ectopic pregnancy as it can worsen bleeding. Rapid transport for surgical intervention is paramount."
+  },
+  {
+    "id": "mcq48",
+    "scenario": "A 72-year-old male with a history of atrial fibrillation is complaining of sudden onset of severe, sharp abdominal pain that is out of proportion to physical findings. He has a history of peripheral vascular disease.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Diverticulitis",
+      "Appendicitis",
+      "Mesenteric ischemia",
+      "Cholecystitis"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Severe abdominal pain that is out of proportion to physical findings, especially in a patient with risk factors for emboli (atrial fibrillation, peripheral vascular disease), is highly suggestive of mesenteric ischemia (lack of blood flow to the intestines).",
+    "feedbackIncorrect": "Diverticulitis and appendicitis typically have localized pain and more pronounced physical findings. Cholecystitis pain is typically in the right upper quadrant."
+  },
+  {
+    "id": "mcq49",
+    "scenario": "You are called to a scene for a patient who has ingested a large amount of acetaminophen. The patient is currently asymptomatic.",
+    "question": "What is the MOST important piece of information to obtain, and why?",
+    "options": [
+      "The patient's weight, to calculate the toxic dose.",
+      "The exact time of ingestion, to determine the appropriate antidote and treatment window.",
+      "A list of all other medications the patient is taking, to assess for drug interactions.",
+      "The patient's medical history, to identify pre-existing conditions."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For acetaminophen overdose, the exact time of ingestion is critical. This allows for accurate plotting on a Rumack-Matthew nomogram to determine the risk of hepatotoxicity and the need for N-acetylcysteine (NAC), the antidote. NAC is most effective when given within 8 hours of ingestion.",
+    "feedbackIncorrect": "While patient weight and other medications are important, the time of ingestion is paramount for guiding treatment decisions in acetaminophen overdose. Medical history is also important but secondary to the time of ingestion for this specific overdose."
+  },
+  {
+    "id": "mcq50",
+    "scenario": "A 1-year-old child presents with a high fever, irritability, and a bulging fontanelle. The child is difficult to arouse.",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital concern?",
+    "options": [
+      "Febrile seizure; protect the airway.",
+      "Meningitis; rapid transport and minimize stimulation.",
+      "Dehydration; administer IV fluids.",
+      "Hydrocephalus; monitor intracranial pressure."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "High fever, irritability, bulging fontanelle, and altered mental status in an infant are classic signs of meningitis. The primary prehospital concern is rapid transport to a definitive care facility while minimizing stimulation, as this can worsen symptoms.",
+    "feedbackIncorrect": "Febrile seizures are typically self-limiting and do not usually present with a bulging fontanelle. While dehydration can cause a sunken fontanelle, a bulging fontanelle indicates increased intracranial pressure. Hydrocephalus is a chronic condition, though an acute exacerbation could present similarly, meningitis is more likely given the fever and irritability."
+  },
+  {
+    "id": "mcq51",
+    "scenario": "You are treating a patient with a suspected acute coronary syndrome. The patient is experiencing chest pain, and you have administered aspirin and nitroglycerin. The patient's blood pressure is now 88/50.",
+    "question": "What is the MOST appropriate next intervention?",
+    "options": [
+      "Administer another dose of nitroglycerin.",
+      "Administer a fluid bolus.",
+      "Administer morphine for pain.",
+      "Prepare for transcutaneous pacing."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The patient is hypotensive after nitroglycerin administration. The most appropriate next intervention is to administer a fluid bolus to increase preload and blood pressure. Nitroglycerin is contraindicated in hypotensive patients. Morphine can further lower blood pressure. Pacing is for bradycardia, not hypotension from vasodilation.",
+    "feedbackIncorrect": "Administering more nitroglycerin would worsen hypotension. Morphine can also cause hypotension. Transcutaneous pacing is for symptomatic bradycardia, not hypotension due to vasodilation."
+  },
+  {
+    "id": "mcq52",
+    "scenario": "A 30-year-old male was involved in a motor vehicle collision. He is complaining of severe pain in his pelvis. On assessment, you note instability of the pelvis and gross hematuria.",
+    "question": "What is the MOST critical prehospital intervention for this patient?",
+    "options": [
+      "Apply a pelvic binder.",
+      "Administer pain medication.",
+      "Insert a urinary catheter.",
+      "Perform a rapid extrication."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "Pelvic instability with gross hematuria suggests a significant pelvic fracture, which can lead to massive internal hemorrhage. Applying a pelvic binder is a critical intervention to stabilize the pelvis, reduce internal bleeding, and improve patient outcomes.",
+    "feedbackIncorrect": "While pain medication is important, it is secondary to life-saving interventions. Inserting a urinary catheter is contraindicated in suspected urethral injury (indicated by gross hematuria with pelvic trauma). Rapid extrication should only be performed if the scene is unsafe or the patient's condition is rapidly deteriorating and other interventions cannot be performed in place."
+  },
+  {
+    "id": "mcq53",
+    "scenario": "You are assessing a patient with a history of chronic obstructive pulmonary disease (COPD) who is on home oxygen. He is experiencing acute shortness of breath. His SpO2 is 85% on 2 L/min nasal cannula. He is alert and oriented.",
+    "question": "What is the MOST appropriate initial oxygen management strategy?",
+    "options": [
+      "Increase oxygen to 15 L/min via non-rebreather mask.",
+      "Increase oxygen to 4 L/min via nasal cannula and monitor SpO2.",
+      "Switch to a Venturi mask to deliver a precise FiO2.",
+      "Administer CPAP at 5 cmH2O."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For a COPD patient experiencing acute shortness of breath with an SpO2 of 85%, the initial goal is to gradually increase oxygen to achieve an SpO2 of 88-92%. Increasing the nasal cannula flow rate and monitoring is a reasonable first step. While CPAP might be indicated later, a gradual increase in oxygen is appropriate initially.",
+    "feedbackIncorrect": "Immediately jumping to a non-rebreather mask at 15 L/min might over-oxygenate a COPD patient, potentially leading to respiratory depression. A Venturi mask is useful for precise FiO2, but a simple increase in nasal cannula flow is often sufficient initially. CPAP is a good option but not necessarily the *initial* management for an alert patient."
+  },
+  {
+    "id": "mcq54",
+    "scenario": "A 40-year-old male is found unconscious with an empty bottle of antifreeze nearby. His respirations are deep and rapid, and he has a strong odor of alcohol on his breath. His blood glucose is normal.",
+    "question": "What is the MOST likely ingested substance, and what is the primary concern?",
+    "options": [
+      "Ethanol; respiratory depression.",
+      "Methanol; ocular toxicity.",
+      "Ethylene glycol; metabolic acidosis and renal failure.",
+      "Isopropyl alcohol; hemorrhagic gastritis."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Antifreeze typically contains ethylene glycol. Ingestion leads to severe metabolic acidosis and can cause acute renal failure. The deep and rapid respirations (Kussmaul) are a compensatory mechanism for the acidosis. While alcohol odor is present, the empty antifreeze bottle is key.",
+    "feedbackIncorrect": "Ethanol ingestion would cause respiratory depression, not Kussmaul respirations with normal blood glucose. Methanol causes ocular toxicity but the primary concern with ethylene glycol is metabolic acidosis and renal failure. Isopropyl alcohol causes hemorrhagic gastritis but not typically severe metabolic acidosis and renal failure."
+  },
+  {
+    "id": "mcq55",
+    "scenario": "You are assessing a patient with a suspected stroke. You perform a Cincinnati Prehospital Stroke Scale and note facial droop, arm drift, and slurred speech. The patient's blood glucose is 50 mg/dL.",
+    "question": "What is the MOST appropriate next step?",
+    "options": [
+      "Administer D50 IV and reassess the patient.",
+      "Transport immediately to a stroke center.",
+      "Perform a detailed neurological exam.",
+      "Administer aspirin."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "While the patient presents with stroke-like symptoms, hypoglycemia can mimic a stroke. Therefore, correcting the hypoglycemia with D50 IV is the most appropriate first step. If symptoms resolve, it was likely a stroke mimic. If symptoms persist, then proceed with stroke protocols.",
+    "feedbackIncorrect": "Transport to a stroke center is appropriate if symptoms persist after correcting hypoglycemia. A detailed neurological exam is important but secondary to correcting a treatable cause of altered mental status. Aspirin is contraindicated until a hemorrhagic stroke is ruled out."
+  },
+  {
+    "id": "mcq56",
+    "scenario": "A 2-day-old neonate presents with severe respiratory distress, cyanosis, and a scaphoid abdomen. The mother reports a difficult delivery.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Respiratory distress syndrome",
+      "Transient tachypnea of the newborn",
+      "Congenital diaphragmatic hernia",
+      "Meconium aspiration syndrome"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The classic triad of severe respiratory distress, cyanosis, and a scaphoid (concave) abdomen in a neonate is highly indicative of a congenital diaphragmatic hernia, where abdominal organs have herniated into the chest cavity, compressing the lungs.",
+    "feedbackIncorrect": "Respiratory distress syndrome and transient tachypnea of the newborn typically do not present with a scaphoid abdomen. Meconium aspiration syndrome would present with respiratory distress but not typically a scaphoid abdomen."
+  },
+  {
+    "id": "mcq57",
+    "scenario": "You are treating a patient with a suspected ruptured esophageal varices. The patient is actively vomiting large amounts of bright red blood. His blood pressure is 70/40, and heart rate is 130.",
+    "question": "What is the MOST critical prehospital intervention?",
+    "options": [
+      "Administer IV fluids rapidly.",
+      "Insert a nasogastric tube to decompress the stomach.",
+      "Administer octreotide.",
+      "Secure the airway and prepare for intubation."
+    ],
+    "correctAnswerIndex": 3,
+    "feedbackCorrect": "In a patient with active upper GI bleeding and signs of shock, securing the airway is paramount due to the high risk of aspiration of blood. While IV fluids are important, airway protection takes precedence. Nasogastric tubes can worsen bleeding in varices. Octreotide is a hospital medication.",
+    "feedbackIncorrect": "While IV fluids are important, airway protection is the immediate priority. Nasogastric tubes are contraindicated in suspected variceal bleeding. Octreotide is a hospital-level medication."
+  },
+  {
+    "id": "mcq58",
+    "scenario": "A 60-year-old male with a history of hypertension and hyperlipidemia presents with sudden onset of severe, tearing chest pain radiating to his back. He has a difference in blood pressure between his arms.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Acute myocardial infarction",
+      "Pulmonary embolism",
+      "Aortic dissection",
+      "Pericarditis"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden, severe, tearing chest pain radiating to the back with a difference in blood pressure between the arms is the classic presentation of an aortic dissection.",
+    "feedbackIncorrect": "AMI typically presents with crushing substernal pain. Pulmonary embolism can cause pleuritic chest pain and shortness of breath. Pericarditis presents with sharp chest pain that is often relieved by leaning forward."
+  },
+  {
+    "id": "mcq59",
+    "scenario": "You are assessing a patient with a suspected tension pneumothorax. Which of the following physical findings is the LEAST reliable indicator of a tension pneumothorax in the prehospital setting?",
+    "options": [
+      "Absent breath sounds on the affected side.",
+      "Tracheal deviation away from the affected side.",
+      "Jugular vein distention (JVD).",
+      "Hypotension."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Tracheal deviation is a late and often subtle sign of tension pneumothorax and can be difficult to assess accurately in the prehospital setting, especially in a moving ambulance or with a short neck. Absent breath sounds, JVD, and hypotension are more reliable indicators.",
+    "feedbackIncorrect": "Absent breath sounds, JVD, and hypotension are all reliable indicators of a tension pneumothorax. Tracheal deviation is a late and often difficult-to-assess sign."
+  },
+  {
+    "id": "mcq60",
+    "scenario": "A 25-year-old female presents with sudden onset of severe lower abdominal pain, vaginal bleeding, and dizziness. She is pale and tachycardic. Her last menstrual period was 8 weeks ago.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Miscarriage",
+      "Pelvic inflammatory disease (PID)",
+      "Ectopic pregnancy",
+      "Ovarian cyst rupture"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden, severe lower abdominal pain, vaginal bleeding, dizziness, and signs of hypovolemia (pallor, tachycardia) in a female of childbearing age with a missed period are classic signs of a ruptured ectopic pregnancy.",
+    "feedbackIncorrect": "Miscarriage would present with vaginal bleeding and cramping, but typically not severe unilateral pain and signs of hypovolemic shock. PID presents with lower abdominal pain, fever, and vaginal discharge. Ovarian cyst rupture can cause sudden pain but less commonly presents with significant hypovolemia."
+  },
+  {
+    "id": "mcq61",
+    "scenario": "You are treating a patient with a severe head injury. The patient exhibits decerebrate posturing. What does this indicate?",
+    "question": "What does decerebrate posturing indicate?",
+    "options": [
+      "Damage to the cerebral hemispheres.",
+      "Damage to the brainstem, specifically below the red nucleus.",
+      "Damage to the spinal cord.",
+      "Damage to the cerebellum."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Decerebrate posturing (extension of all four extremities) indicates severe damage to the brainstem, specifically below the red nucleus. This is a more ominous sign than decorticate posturing.",
+    "feedbackIncorrect": "Decorticate posturing indicates damage to the cerebral hemispheres (above the red nucleus). Damage to the spinal cord would cause paralysis below the injury. Damage to the cerebellum primarily affects coordination and balance."
+  },
+  {
+    "id": "mcq62",
+    "scenario": "A 5-year-old child presents with a sudden onset of high fever, petechial rash, and altered mental status. The parents report the child has been lethargic and irritable.",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital concern?",
+    "options": [
+      "Viral infection; supportive care.",
+      "Bacterial meningitis; rapid transport and consider droplet precautions.",
+      "Sepsis; administer IV fluids.",
+      "Febrile seizure; protect the airway."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "High fever, petechial rash, and altered mental status in a child are classic signs of bacterial meningitis, a life-threatening infection. Rapid transport is crucial, and droplet precautions should be considered to protect healthcare providers.",
+    "feedbackIncorrect": "While viral infections are common, the petechial rash and altered mental status point to a more severe bacterial infection. Sepsis is a possibility, but meningitis is a more specific diagnosis given the signs. Febrile seizures typically do not present with a petechial rash."
+  },
+  {
+    "id": "mcq63",
+    "scenario": "You are treating a patient with a suspected CVA (stroke). The patient is unable to move their right arm or leg. You note that the patient's eyes are deviated to the left.",
+    "question": "What does the eye deviation indicate in this stroke patient?",
+    "options": [
+      "The stroke is in the right hemisphere.",
+      "The stroke is in the left hemisphere.",
+      "The stroke is in the brainstem.",
+      "The patient is experiencing a seizure."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "In a stroke patient, eye deviation typically occurs towards the side of the brain lesion and away from the paralyzed side. Since the patient has right-sided weakness (indicating a left hemisphere stroke), the eyes would deviate to the left.",
+    "feedbackIncorrect": "Eye deviation to the right would indicate a right hemisphere stroke. Brainstem strokes can cause various eye movement abnormalities but not typically this pattern. Seizures can cause eye deviation, but the primary presentation is stroke."
+  },
+  {
+    "id": "mcq64",
+    "scenario": "A 30-year-old male was rescued from a house fire. He has burns to his face and neck, singed nasal hairs, and a hoarse voice. His SpO2 is 98%.",
+    "question": "What is the MOST critical immediate intervention?",
+    "options": [
+      "Administer high-flow oxygen via non-rebreather mask.",
+      "Cool the burns with sterile water.",
+      "Prepare for early intubation.",
+      "Administer pain medication."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Burns to the face and neck, singed nasal hairs, and a hoarse voice are all signs of impending airway compromise due to inhalation injury. Despite a normal SpO2, early intubation is critical to secure the airway before swelling makes it impossible.",
+    "feedbackIncorrect": "While oxygen is important, securing the airway takes precedence. Cooling burns is important but secondary to airway. Pain medication is also secondary to airway management."
+  },
+  {
+    "id": "mcq65",
+    "scenario": "You are assessing a patient with a suspected ruptured abdominal aortic aneurysm (AAA). The patient is hypotensive and tachycardic. What is the MOST appropriate fluid management strategy?",
+    "question": "What is the MOST appropriate fluid management strategy for a suspected ruptured AAA?",
+    "options": [
+      "Aggressive fluid resuscitation to normalize blood pressure.",
+      "Administer small fluid boluses to maintain a systolic blood pressure of 90-100 mmHg (permissive hypotension).",
+      "Administer blood products immediately.",
+      "Avoid all fluids to prevent worsening hemorrhage."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For a suspected ruptured AAA, the goal of fluid management is permissive hypotension. Aggressive fluid resuscitation can increase blood pressure, dislodge clots, and worsen hemorrhage. The goal is to maintain a systolic blood pressure sufficient for organ perfusion (e.g., 90-100 mmHg) while awaiting surgical repair.",
+    "feedbackIncorrect": "Aggressive fluid resuscitation is contraindicated. Blood products are given in the hospital. Avoiding all fluids would lead to worsening shock."
+  },
+  {
+    "id": "mcq66",
+    "scenario": "A 2-year-old child presents with a sudden onset of difficulty breathing, wheezing, and a history of asthma. The child is using accessory muscles and has an SpO2 of 90%.",
+    "question": "What is the MOST appropriate initial intervention?",
+    "options": [
+      "Administer albuterol via nebulizer.",
+      "Administer high-flow oxygen via non-rebreather mask.",
+      "Administer systemic corticosteroids.",
+      "Prepare for intubation."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "For an asthmatic child in respiratory distress with wheezing, the most appropriate initial intervention is to administer a bronchodilator like albuterol via nebulizer. This directly addresses the bronchospasm. Oxygen is also important, but albuterol targets the underlying issue.",
+    "feedbackIncorrect": "While oxygen is important, albuterol directly addresses the bronchospasm. Systemic corticosteroids are used for longer-term management, not immediate relief. Intubation is a last resort for respiratory failure."
+  },
+  {
+    "id": "mcq67",
+    "scenario": "You are assessing a patient with a suspected carbon monoxide poisoning. The patient is unconscious, and their SpO2 is 100%. What is the MOST appropriate oxygen delivery device?",
+    "question": "What is the MOST appropriate oxygen delivery device for a patient with suspected carbon monoxide poisoning?",
+    "options": [
+      "Nasal cannula at 4 L/min.",
+      "Non-rebreather mask at 15 L/min.",
+      "Venturi mask at 28% FiO2.",
+      "Bag-valve mask with 100% oxygen."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For carbon monoxide poisoning, the goal is to deliver the highest possible concentration of oxygen to displace carbon monoxide from hemoglobin. A non-rebreather mask at 15 L/min is the most appropriate device in the prehospital setting to achieve this.",
+    "feedbackIncorrect": "Nasal cannula and Venturi masks deliver lower concentrations of oxygen. A BVM is used for ventilatory assistance, not primarily for high-concentration oxygen delivery in a spontaneously breathing patient."
+  },
+  {
+    "id": "mcq68",
+    "scenario": "A 35-year-old male is found unresponsive with a blood glucose of 30 mg/dL. He has no IV access. What is the MOST appropriate intervention?",
+    "question": "What is the MOST appropriate intervention for an unresponsive hypoglycemic patient without IV access?",
+    "options": [
+      "Administer oral glucose paste.",
+      "Administer 1 mg Glucagon IM.",
+      "Attempt to establish IV access for D50.",
+      "Transport immediately."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For an unresponsive hypoglycemic patient without IV access, intramuscular (IM) glucagon is the most appropriate intervention. Oral glucose is contraindicated due to aspiration risk. While attempting IV access is important, glucagon can be given more rapidly.",
+    "feedbackIncorrect": "Oral glucose is contraindicated. While attempting IV access is important, glucagon can be given more rapidly. Transport is necessary, but treatment should not be delayed."
+  },
+  {
+    "id": "mcq69",
+    "scenario": "You are assessing a patient with a suspected opioid overdose. The patient is unresponsive, has pinpoint pupils, and a respiratory rate of 4 breaths per minute. What is the MOST appropriate initial dose of naloxone?",
+    "question": "What is the MOST appropriate initial dose of naloxone for a suspected opioid overdose?",
+    "options": [
+      "0.4 mg IM.",
+      "1 mg IV.",
+      "2 mg intranasal.",
+      "4 mg intranasal or IM."
+    ],
+    "correctAnswerIndex": 3,
+    "feedbackCorrect": "For a patient with suspected opioid overdose and severe respiratory depression, the current recommendation is to administer 2 mg intranasal or 0.4 mg to 2 mg intramuscularly, with repeated doses as needed. Many protocols now recommend 4 mg intranasal as an initial dose due to its ease of administration and effectiveness.",
+    "feedbackIncorrect": "While 0.4 mg IM was a traditional dose, current guidelines often recommend higher initial doses for severe respiratory depression. 1 mg IV is a common dose, but intranasal or IM are often preferred for ease and speed in the prehospital setting."
+  },
+  {
+    "id": "mcq70",
+    "scenario": "A 28-year-old male was struck by lightning. He is unconscious, pulseless, and apneic. What is the MOST important initial intervention?",
+    "question": "What is the MOST important initial intervention for a patient struck by lightning?",
+    "options": [
+      "Begin CPR and attach an AED.",
+      "Stabilize the cervical spine.",
+      "Assess for entrance and exit wounds.",
+      "Administer high-flow oxygen."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "Lightning strike victims often experience immediate cardiac arrest, typically as asystole or ventricular fibrillation. Therefore, the most important initial intervention is to begin CPR and attach an AED. Unlike other trauma, respiratory arrest often precedes cardiac arrest in lightning strike victims, so ventilations are crucial.",
+    "feedbackIncorrect": "While C-spine stabilization is important in trauma, cardiac arrest takes precedence. Assessing wounds and administering oxygen are secondary to addressing the immediate life threat of cardiac arrest."
+  },
+  {
+    "id": "mcq71",
+    "scenario": "You are assessing a patient with a suspected heat stroke. The patient is confused, has hot and dry skin, and a core body temperature of 105\u00b0F (40.6\u00b0C).",
+    "question": "What is the MOST critical prehospital intervention?",
+    "options": [
+      "Administer oral fluids.",
+      "Move the patient to a cooler environment and begin active cooling measures.",
+      "Administer acetaminophen to lower the fever.",
+      "Encourage the patient to shiver."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Heat stroke is a life-threatening emergency characterized by a core body temperature >104\u00b0F (40\u00b0C) and altered mental status. The most critical intervention is to move the patient to a cooler environment and immediately begin active cooling measures (e.g., cold packs to groin/axillae, misting with water and fanning).",
+    "feedbackIncorrect": "Oral fluids are contraindicated in an altered patient. Acetaminophen is ineffective for heat stroke as the thermoregulatory center is overwhelmed, not reset. Shivering would generate more heat and is not desired."
+  },
+  {
+    "id": "mcq72",
+    "scenario": "A 6-month-old infant presents with a sudden onset of high fever, poor feeding, and a non-blanching petechial rash. The infant is lethargic.",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital concern?",
+    "options": [
+      "Viral exanthem; supportive care.",
+      "Bacterial sepsis/meningitis; rapid transport and consider early fluid boluses.",
+      "Allergic reaction; administer diphenhydramine.",
+      "Child abuse; ensure scene safety and document findings."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "High fever, lethargy, and a non-blanching petechial rash in an infant are highly concerning for bacterial sepsis or meningitis, which can rapidly progress to septic shock. Rapid transport and early fluid boluses are critical interventions.",
+    "feedbackIncorrect": "Viral exanthems typically blanch. Allergic reactions would present with hives (urticaria) that blanch. While child abuse should always be considered, the clinical picture points more strongly to a severe infection."
+  },
+  {
+    "id": "mcq73",
+    "scenario": "You are treating a patient with a suspected tension pneumothorax. After performing a needle decompression, you notice a sudden improvement in the patient's respiratory distress and blood pressure. However, you now hear gurgling sounds over the epigastrium with each ventilation.",
+    "question": "What is the MOST likely complication of the needle decompression?",
+    "options": [
+      "Hemothorax",
+      "Cardiac tamponade",
+      "Esophageal intubation",
+      "Gastric perforation"
+    ],
+    "correctAnswerIndex": 3,
+    "feedbackCorrect": "Gurgling sounds over the epigastrium with ventilations after a needle decompression suggest that the needle may have perforated the stomach or esophagus, especially if inserted too low or too medially. This is a serious complication.",
+    "feedbackIncorrect": "Hemothorax would present with signs of bleeding. Cardiac tamponade would present with Beck's triad. Esophageal intubation would be a complication of airway management, not needle decompression."
+  },
+  {
+    "id": "mcq74",
+    "scenario": "A 40-year-old male is found unresponsive with a blood glucose of 30 mg/dL. He has a history of insulin-dependent diabetes. His family states he has been drinking heavily.",
+    "question": "What is the MOST appropriate intervention if IV access cannot be established?",
+    "options": [
+      "Administer oral glucose paste.",
+      "Administer 1 mg Glucagon IM.",
+      "Administer 25 grams Dextrose 50% IV.",
+      "Transport immediately."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For an unresponsive hypoglycemic patient without IV access, intramuscular (IM) glucagon is the most appropriate intervention. Oral glucose is contraindicated due to aspiration risk. While attempting IV access is important, glucagon can be given more rapidly.",
+    "feedbackIncorrect": "Oral glucose is contraindicated. While attempting IV access is important, glucagon can be given more rapidly. Transport is necessary, but treatment should not be delayed."
+  },
+  {
+    "id": "mcq75",
+    "scenario": "You are assessing a patient with a suspected CVA (stroke). The patient has right-sided weakness and slurred speech. The patient's family states the symptoms started 6 hours ago.",
+    "question": "Given the time of symptom onset, what is the MOST likely reason this patient would NOT be a candidate for thrombolytic therapy (tPA)?",
+    "options": [
+      "The patient's age.",
+      "The patient's symptoms are too severe.",
+      "The time window for tPA administration has likely passed.",
+      "The patient's blood pressure is too high."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The critical time window for administering thrombolytic therapy (tPA) for ischemic stroke is typically 3 hours from symptom onset, which can be extended to 4.5 hours in select patients. At 6 hours, the time window has likely passed, making the patient ineligible for tPA.",
+    "feedbackIncorrect": "Age is not an absolute contraindication for tPA. Symptom severity is not a contraindication. While blood pressure must be controlled, it is not the primary reason for ineligibility at 6 hours."
+  },
+  {
+    "id": "mcq76",
+    "scenario": "A 20-year-old male was involved in a high-speed motor vehicle collision. He is unconscious, has unequal pupils, and exhibits decorticate posturing. His blood pressure is 180/90, heart rate is 60, and respirations are irregular.",
+    "question": "What is this constellation of signs called, and what does it indicate?",
+    "options": [
+      "Neurogenic shock; spinal cord injury.",
+      "Cushing's triad; increased intracranial pressure.",
+      "Beck's triad; cardiac tamponade.",
+      "Shock; hypovolemia."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The combination of hypertension, bradycardia, and irregular respirations (Cheyne-Stokes or ataxic) is known as Cushing's triad. This triad is a classic sign of significantly increased intracranial pressure (ICP), often seen in severe traumatic brain injury.",
+    "feedbackIncorrect": "Neurogenic shock presents with hypotension and bradycardia (or normal heart rate). Beck's triad (muffled heart tones, JVD, narrowing pulse pressure) is for cardiac tamponade. Shock is a general term for inadequate tissue perfusion."
+  },
+  {
+    "id": "mcq77",
+    "scenario": "You are treating a patient with a suspected tension pneumothorax. After performing a needle decompression, you hear a sudden rush of air, and the patient's respiratory distress improves. However, the patient remains hypotensive. What is the MOST likely reason for persistent hypotension?",
+    "question": "What is the MOST likely reason for persistent hypotension after a successful needle decompression?",
+    "options": [
+      "The patient has developed a hemothorax.",
+      "The patient has developed a cardiac tamponade.",
+      "The patient has underlying hypovolemic shock.",
+      "The needle decompression was not truly successful."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "While a needle decompression may relieve the tension pneumothorax, the patient may have underlying hypovolemic shock from other injuries (e.g., internal bleeding from trauma). Therefore, persistent hypotension after a successful decompression should prompt a search for other causes of shock.",
+    "feedbackIncorrect": "If the decompression was successful, a hemothorax or cardiac tamponade would present with their own distinct signs. If the decompression was not truly successful, there would be no rush of air or improvement in respiratory distress."
+  },
+  {
+    "id": "mcq78",
+    "scenario": "A 68-year-old female with a history of diabetes and hypertension presents with sudden onset of severe abdominal pain, nausea, and vomiting. On examination, her abdomen is distended and tender, and she has absent bowel sounds. She has a history of abdominal surgery.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Appendicitis",
+      "Cholecystitis",
+      "Bowel obstruction",
+      "Diverticulitis"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden onset of severe abdominal pain, distention, nausea, vomiting, and absent bowel sounds, especially in a patient with a history of abdominal surgery (which can cause adhesions), is highly suggestive of a bowel obstruction.",
+    "feedbackIncorrect": "Appendicitis typically presents with localized right lower quadrant pain. Cholecystitis presents with right upper quadrant pain. Diverticulitis presents with lower left quadrant pain."
+  },
+  {
+    "id": "mcq79",
+    "scenario": "You are treating a patient with a suspected stroke. The patient is receiving oxygen via nasal cannula at 2 L/min, and their SpO2 is 94%. What is the MOST appropriate oxygen management strategy?",
+    "question": "What is the MOST appropriate oxygen management strategy for a suspected stroke patient with an SpO2 of 94%?",
+    "options": [
+      "Increase oxygen to 15 L/min via non-rebreather mask.",
+      "Maintain oxygen at 2 L/min via nasal cannula.",
+      "Discontinue oxygen.",
+      "Administer CPAP."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For stroke patients, the goal is to maintain an SpO2 of 94-98%. If the patient is already at 94% on 2 L/min nasal cannula, maintaining this level is appropriate. Over-oxygenation (hyperoxia) can be detrimental in stroke patients.",
+    "feedbackIncorrect": "Increasing oxygen to 15 L/min would likely lead to hyperoxia, which is harmful in stroke. Discontinuing oxygen would lead to hypoxia. CPAP is not indicated for routine stroke management."
+  },
+  {
+    "id": "mcq80",
+    "scenario": "A 25-year-old female presents with sudden onset of severe shortness of breath, chest pain, and anxiety. She recently took a long-haul flight. Her vital signs are stable, and lung sounds are clear.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Anxiety attack",
+      "Pneumonia",
+      "Pulmonary embolism",
+      "Spontaneous pneumothorax"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden onset of shortness of breath and chest pain, especially after prolonged immobility (like a long flight), with clear lung sounds, is highly suggestive of a pulmonary embolism. Anxiety is a common secondary symptom.",
+    "feedbackIncorrect": "While an anxiety attack can cause similar symptoms, the history of a long flight points to PE. Pneumonia would have abnormal lung sounds and often a fever. Spontaneous pneumothorax would have diminished breath sounds on one side."
+  },
+  {
+    "id": "mcq81",
+    "scenario": "You are treating a patient with a suspected opioid overdose. After administering naloxone, the patient becomes responsive but remains combative and refuses further treatment. What is your primary concern?",
+    "question": "What is your primary concern when a naloxone-reversed patient becomes combative and refuses further treatment?",
+    "options": [
+      "The patient may become unresponsive again due to the short half-life of naloxone.",
+      "The patient may have other underlying medical conditions.",
+      "The patient may become violent and harm the EMS crew.",
+      "The patient may have a head injury."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "Naloxone has a shorter half-life than most opioids. Therefore, a patient who has been reversed with naloxone is at high risk of becoming unresponsive and experiencing respiratory depression again once the naloxone wears off. This is the primary concern, and continued monitoring and transport are crucial.",
+    "feedbackIncorrect": "While other medical conditions, violence, and head injury are possibilities, the most immediate and common concern after naloxone reversal is the recurrence of opioid effects due to naloxone's short half-life."
+  },
+  {
+    "id": "mcq82",
+    "scenario": "A 70-year-old male with a history of heart failure presents with acute shortness of breath, orthopnea, and paroxysmal nocturnal dyspnea. On examination, you note bilateral crackles and pitting edema to his ankles.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Pneumonia",
+      "COPD exacerbation",
+      "Acute decompensated heart failure",
+      "Pulmonary embolism"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Acute shortness of breath, orthopnea (difficulty breathing when lying flat), paroxysmal nocturnal dyspnea (sudden shortness of breath at night), bilateral crackles, and peripheral edema are classic signs of acute decompensated heart failure (pulmonary edema).",
+    "feedbackIncorrect": "Pneumonia would typically have fever and localized lung sounds. COPD exacerbation would have wheezing and often a history of smoking. Pulmonary embolism would typically have clear lung sounds or localized findings."
+  },
+  {
+    "id": "mcq83",
+    "scenario": "You are assessing a patient with a suspected stroke. The patient's blood pressure is 200/110. What is the MOST appropriate initial management of their blood pressure in the prehospital setting?",
+    "question": "What is the MOST appropriate initial management of blood pressure in a suspected stroke patient in the prehospital setting?",
+    "options": [
+      "Aggressively lower the blood pressure to normal limits immediately.",
+      "Administer a beta-blocker to lower the heart rate and blood pressure.",
+      "Allow for permissive hypertension unless the systolic blood pressure exceeds 220 mmHg or diastolic exceeds 120 mmHg.",
+      "Administer a diuretic to reduce fluid volume and blood pressure."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "In acute ischemic stroke, permissive hypertension is generally recommended in the prehospital setting unless the systolic blood pressure exceeds 220 mmHg or the diastolic exceeds 120 mmHg. This is because the brain may be relying on higher pressures to maintain perfusion through compromised vessels. Aggressive lowering can worsen cerebral ischemia.",
+    "feedbackIncorrect": "Aggressive lowering of blood pressure can worsen stroke outcomes. Beta-blockers and diuretics are not typically first-line for acute stroke hypertension in the prehospital setting."
+  },
+  {
+    "id": "mcq84",
+    "scenario": "A 16-year-old female presents with sudden onset of severe, sharp, unilateral lower abdominal pain. She is pale and lightheaded. Her last menstrual period was 3 weeks ago.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Appendicitis",
+      "Ovarian torsion",
+      "Ectopic pregnancy",
+      "Urinary tract infection"
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Sudden onset of severe, sharp, unilateral lower abdominal pain, especially with pallor and lightheadedness, in a female of childbearing age, is highly suggestive of ovarian torsion (twisting of the ovary). While ectopic pregnancy is also a consideration, the sharp, sudden nature often points to torsion.",
+    "feedbackIncorrect": "Appendicitis pain typically starts periumbilical and migrates. Ectopic pregnancy would be more likely with a missed period. UTI would present with dysuria and frequency."
+  },
+  {
+    "id": "mcq85",
+    "scenario": "You are treating a patient with a suspected anaphylactic reaction. After administering epinephrine, the patient's respiratory distress improves, but they remain hypotensive. What is the MOST appropriate next intervention?",
+    "question": "What is the MOST appropriate next intervention for an anaphylactic patient who remains hypotensive after epinephrine?",
+    "options": [
+      "Administer another dose of epinephrine.",
+      "Administer a large volume IV fluid bolus.",
+      "Administer diphenhydramine.",
+      "Administer a vasopressor infusion."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "After epinephrine, if hypotension persists in anaphylaxis, the next critical step is to administer a large volume IV fluid bolus. Anaphylaxis causes massive vasodilation and capillary leak, leading to significant intravascular volume depletion. Fluid resuscitation is essential to restore blood pressure.",
+    "feedbackIncorrect": "While a second dose of epinephrine may be needed, addressing the profound hypovolemia with fluids is often the next priority. Diphenhydramine is an antihistamine and does not address hypotension. Vasopressor infusions are typically hospital-level interventions."
+  },
+  {
+    "id": "mcq86",
+    "scenario": "A 75-year-old male with a history of COPD is found unresponsive. His family states he has been increasingly lethargic. His respiratory rate is 6 breaths per minute, and his SpO2 is 80% on room air. He has a barrel chest and clubbing of his fingers.",
+    "question": "What is the MOST likely cause of his unresponsiveness?",
+    "options": [
+      "Hypoglycemia",
+      "Opioid overdose",
+      "Acute hypercapnic respiratory failure",
+      "Acute myocardial infarction"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "In a patient with severe COPD, chronic CO2 retention can lead to a blunted respiratory drive. An acute exacerbation or worsening of his condition can lead to acute hypercapnic respiratory failure, where rising CO2 levels cause altered mental status and unresponsiveness. The low respiratory rate and SpO2 support this.",
+    "feedbackIncorrect": "While hypoglycemia and opioid overdose can cause unresponsiveness, the patient's history of COPD and signs of chronic respiratory disease point to hypercapnic respiratory failure. AMI would present with cardiac symptoms."
+  },
+  {
+    "id": "mcq87",
+    "scenario": "You are treating a patient with a severe burn to their arm. The burn is full-thickness and covers the entire circumference of the arm. What is the primary concern with this type of burn?",
+    "question": "What is the primary concern with a full-thickness circumferential burn to an extremity?",
+    "options": [
+      "Infection",
+      "Fluid loss",
+      "Compartment syndrome",
+      "Pain management"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "A full-thickness circumferential burn to an extremity can act like a tourniquet as the edema forms underneath the non-elastic eschar. This can lead to compartment syndrome, compromising circulation to the distal extremity. This is a surgical emergency requiring escharotomy.",
+    "feedbackIncorrect": "While infection, fluid loss, and pain management are important in burn care, compartment syndrome is the most immediate and limb-threatening concern for a circumferential burn."
+  },
+  {
+    "id": "mcq88",
+    "scenario": "A 30-year-old female presents with sudden onset of severe, sharp, unilateral flank pain radiating to her groin. She is nauseated and restless. She has a history of similar episodes.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Appendicitis",
+      "Ectopic pregnancy",
+      "Kidney stones (renal calculi)",
+      "Ovarian cyst rupture"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden onset of severe, sharp, unilateral flank pain radiating to the groin, often accompanied by nausea and restlessness, is classic for kidney stones (renal calculi). The history of similar episodes further supports this diagnosis.",
+    "feedbackIncorrect": "Appendicitis pain typically starts periumbilical and migrates to the right lower quadrant. Ectopic pregnancy would be more likely with a missed period and vaginal bleeding. Ovarian cyst rupture can cause sudden pain but less commonly radiates to the groin in this specific pattern."
+  },
+  {
+    "id": "mcq89",
+    "scenario": "You are assessing a patient with a suspected stroke. The patient's blood glucose is 120 mg/dL. The patient is unable to follow commands. What is the MOST appropriate next step?",
+    "question": "What is the MOST appropriate next step for a suspected stroke patient who is unable to follow commands and has a normal blood glucose?",
+    "options": [
+      "Administer aspirin.",
+      "Transport immediately to a stroke center.",
+      "Perform a detailed neurological exam.",
+      "Administer oxygen via non-rebreather mask."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Once hypoglycemia has been ruled out as a stroke mimic, and the patient presents with acute neurological deficits, rapid transport to a stroke center is the most critical next step. Time is brain, and definitive treatment (e.g., tPA, thrombectomy) is time-sensitive.",
+    "feedbackIncorrect": "Aspirin is contraindicated until a hemorrhagic stroke is ruled out by CT scan. A detailed neurological exam can be performed en route or at the hospital. Oxygen should be administered to maintain SpO2 >94%, but it's not the primary next step if the patient is already oxygenating well."
+  },
+  {
+    "id": "mcq92",
+    "scenario": "You are assessing a patient with a suspected tension pneumothorax. Which of the following physical findings is the LEAST reliable indicator of a tension pneumothorax in the prehospital setting?",
+    "options": [
+      "Absent breath sounds on the affected side.",
+      "Tracheal deviation away from the affected side.",
+      "Jugular vein distention (JVD).",
+      "Hypotension."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Tracheal deviation is a late and often subtle sign of tension pneumothorax and can be difficult to assess accurately in the prehospital setting, especially in a moving ambulance or with a short neck. Absent breath sounds, JVD, and hypotension are more reliable indicators.",
+    "feedbackIncorrect": "Absent breath sounds, JVD, and hypotension are all reliable indicators of a tension pneumothorax. Tracheal deviation is a late and often difficult-to-assess sign."
+  },
+  {
+    "id": "mcq93",
+    "scenario": "A 25-year-old female presents with sudden onset of severe lower abdominal pain, vaginal bleeding, and dizziness. She is pale and tachycardic. Her last menstrual period was 8 weeks ago.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Miscarriage",
+      "Pelvic inflammatory disease (PID)",
+      "Ectopic pregnancy",
+      "Ovarian cyst rupture"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden, severe lower abdominal pain, vaginal bleeding, dizziness, and signs of hypovolemia (pallor, tachycardia) in a female of childbearing age with a missed period are classic signs of a ruptured ectopic pregnancy.",
+    "feedbackIncorrect": "Miscarriage would present with vaginal bleeding and cramping, but typically not severe unilateral pain and signs of hypovolemic shock. PID presents with lower abdominal pain, fever, and vaginal discharge. Ovarian cyst rupture can cause sudden pain but less commonly presents with significant hypovolemia."
+  },
+  {
+    "id": "mcq94",
+    "scenario": "You are treating a patient with a severe head injury. The patient exhibits decerebrate posturing. What does this indicate?",
+    "question": "What does decerebrate posturing indicate?",
+    "options": [
+      "Damage to the cerebral hemispheres.",
+      "Damage to the brainstem, specifically below the red nucleus.",
+      "Damage to the spinal cord.",
+      "Damage to the cerebellum."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Decerebrate posturing (extension of all four extremities) indicates severe damage to the brainstem, specifically below the red nucleus. This is a more ominous sign than decorticate posturing.",
+    "feedbackIncorrect": "Decorticate posturing indicates damage to the cerebral hemispheres (above the red nucleus). Damage to the spinal cord would cause paralysis below the injury. Damage to the cerebellum primarily affects coordination and balance."
+  },
+  {
+    "id": "mcq95",
+    "scenario": "A 5-year-old child presents with a sudden onset of high fever, petechial rash, and altered mental status. The parents report the child has been lethargic and irritable.",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital concern?",
+    "options": [
+      "Viral infection; supportive care.",
+      "Bacterial meningitis; rapid transport and consider droplet precautions.",
+      "Sepsis; administer IV fluids.",
+      "Febrile seizure; protect the airway."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "High fever, petechial rash, and altered mental status in a child are classic signs of bacterial meningitis, a life-threatening infection. Rapid transport is crucial, and droplet precautions should be considered to protect healthcare providers.",
+    "feedbackIncorrect": "While viral infections are common, the petechial rash and altered mental status point to a more severe bacterial infection. Sepsis is a possibility, but meningitis is a more specific diagnosis given the signs. Febrile seizures typically do not present with a petechial rash."
+  },
+  {
+    "id": "mcq96",
+    "scenario": "You are assessing a patient with a suspected CVA (stroke). The patient is unable to move their right arm or leg. You note that the patient's eyes are deviated to the left.",
+    "question": "What does the eye deviation indicate in this stroke patient?",
+    "options": [
+      "The stroke is in the right hemisphere.",
+      "The stroke is in the left hemisphere.",
+      "The stroke is in the brainstem.",
+      "The patient is experiencing a seizure."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "In a stroke patient, eye deviation typically occurs towards the side of the brain lesion and away from the paralyzed side. Since the patient has right-sided weakness (indicating a left hemisphere stroke), the eyes would deviate to the left.",
+    "feedbackIncorrect": "Eye deviation to the right would indicate a right hemisphere stroke. Brainstem strokes can cause various eye movement abnormalities but not typically this pattern. Seizures can cause eye deviation, but the primary presentation is stroke."
+  },
+  {
+    "id": "mcq97",
+    "scenario": "A 30-year-old male was rescued from a house fire. He has burns to his face and neck, singed nasal hairs, and a hoarse voice. His SpO2 is 98%.",
+    "question": "What is the MOST critical immediate intervention?",
+    "options": [
+      "Administer high-flow oxygen via non-rebreather mask.",
+      "Cool the burns with sterile water.",
+      "Prepare for early intubation.",
+      "Administer pain medication."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Burns to the face and neck, singed nasal hairs, and a hoarse voice are all signs of impending airway compromise due to inhalation injury. Despite a normal SpO2, early intubation is critical to secure the airway before swelling makes it impossible.",
+    "feedbackIncorrect": "While oxygen is important, securing the airway takes precedence. Cooling burns is important but secondary to airway. Pain medication is also secondary to airway management."
+  },
+  {
+    "id": "mcq98",
+    "scenario": "You are assessing a patient with a suspected ruptured abdominal aortic aneurysm (AAA). The patient is hypotensive and tachycardic. What is the MOST appropriate fluid management strategy?",
+    "question": "What is the MOST appropriate fluid management strategy for a suspected ruptured AAA?",
+    "options": [
+      "Aggressive fluid resuscitation to normalize blood pressure.",
+      "Administer small fluid boluses to maintain a systolic blood pressure of 90-100 mmHg (permissive hypotension).",
+      "Administer blood products immediately.",
+      "Avoid all fluids to prevent worsening hemorrhage."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For a suspected ruptured AAA, the goal of fluid management is permissive hypotension. Aggressive fluid resuscitation can increase blood pressure, dislodge clots, and worsen hemorrhage. The goal is to maintain a systolic blood pressure sufficient for organ perfusion (e.g., 90-100 mmHg) while awaiting surgical repair.",
+    "feedbackIncorrect": "Aggressive fluid resuscitation is contraindicated. Blood products are given in the hospital. Avoiding all fluids would lead to worsening shock."
+  },
+  {
+    "id": "mcq99",
+    "scenario": "A 2-year-old child presents with a sudden onset of difficulty breathing, wheezing, and a history of asthma. The child is using accessory muscles and has an SpO2 of 90%.",
+    "question": "What is the MOST appropriate initial intervention?",
+    "options": [
+      "Administer albuterol via nebulizer.",
+      "Administer high-flow oxygen via non-rebreather mask.",
+      "Administer systemic corticosteroids.",
+      "Prepare for intubation."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "For an asthmatic child in respiratory distress with wheezing, the most appropriate initial intervention is to administer a bronchodilator like albuterol via nebulizer. This directly addresses the bronchospasm. Oxygen is also important, but albuterol targets the underlying issue.",
+    "feedbackIncorrect": "While oxygen is important, albuterol directly addresses the bronchospasm. Systemic corticosteroids are used for longer-term management, not immediate relief. Intubation is a last resort for respiratory failure."
+  },
+  {
+    "id": "mcq100",
+    "scenario": "You are assessing a patient with a suspected carbon monoxide poisoning. The patient is unconscious, and their SpO2 is 100%. What is the MOST appropriate oxygen delivery device?",
+    "question": "What is the MOST appropriate oxygen delivery device for a patient with suspected carbon monoxide poisoning?",
+    "options": [
+      "Nasal cannula at 4 L/min.",
+      "Non-rebreather mask at 15 L/min.",
+      "Venturi mask at 28% FiO2.",
+      "Bag-valve mask with 100% oxygen."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For carbon monoxide poisoning, the goal is to deliver the highest possible concentration of oxygen to displace carbon monoxide from hemoglobin. A non-rebreather mask at 15 L/min is the most appropriate device in the prehospital setting to achieve this.",
+    "feedbackIncorrect": "Nasal cannula and Venturi masks deliver lower concentrations of oxygen. A BVM is used for ventilatory assistance, not primarily for high-concentration oxygen delivery in a spontaneously breathing patient."
+  },
+  {
+    "id": "mcq101",
+    "scenario": "A 35-year-old male is found unresponsive with a blood glucose of 30 mg/dL. He has no IV access. What is the MOST appropriate intervention?",
+    "question": "What is the MOST appropriate intervention for an unresponsive hypoglycemic patient without IV access?",
+    "options": [
+      "Administer oral glucose paste.",
+      "Administer 1 mg Glucagon IM.",
+      "Attempt to establish IV access for D50.",
+      "Transport immediately."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For an unresponsive hypoglycemic patient without IV access, intramuscular (IM) glucagon is the most appropriate intervention. Oral glucose is contraindicated due to aspiration risk. While attempting IV access is important, glucagon can be given more rapidly.",
+    "feedbackIncorrect": "Oral glucose is contraindicated. While attempting IV access is important, glucagon can be given more rapidly. Transport is necessary, but treatment should not be delayed."
+  },
+  {
+    "id": "mcq102",
+    "scenario": "You are assessing a patient with a suspected opioid overdose. The patient is unresponsive, has pinpoint pupils, and a respiratory rate of 4 breaths per minute. What is the MOST appropriate initial dose of naloxone?",
+    "question": "What is the MOST appropriate initial dose of naloxone for a suspected opioid overdose?",
+    "options": [
+      "0.4 mg IM.",
+      "1 mg IV.",
+      "2 mg intranasal.",
+      "4 mg intranasal or IM."
+    ],
+    "correctAnswerIndex": 3,
+    "feedbackCorrect": "For a patient with suspected opioid overdose and severe respiratory depression, the current recommendation is to administer 2 mg intranasal or 0.4 mg to 2 mg intramuscularly, with repeated doses as needed. Many protocols now recommend 4 mg intranasal as an initial dose due to its ease of administration and effectiveness.",
+    "feedbackIncorrect": "While 0.4 mg IM was a traditional dose, current guidelines often recommend higher initial doses for severe respiratory depression. 1 mg IV is a common dose, but intranasal or IM are often preferred for ease and speed in the prehospital setting."
+  },
+  {
+    "id": "mcq103",
+    "scenario": "A 28-year-old male was struck by lightning. He is unconscious, pulseless, and apneic. What is the MOST important initial intervention?",
+    "question": "What is the MOST important initial intervention for a patient struck by lightning?",
+    "options": [
+      "Begin CPR and attach an AED.",
+      "Stabilize the cervical spine.",
+      "Assess for entrance and exit wounds.",
+      "Administer high-flow oxygen."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "Lightning strike victims often experience immediate cardiac arrest, typically as asystole or ventricular fibrillation. Therefore, the most important initial intervention is to begin CPR and attach an AED. Unlike other trauma, respiratory arrest often precedes cardiac arrest in lightning strike victims, so ventilations are crucial.",
+    "feedbackIncorrect": "While C-spine stabilization is important in trauma, cardiac arrest takes precedence. Assessing wounds and administering oxygen are secondary to addressing the immediate life threat of cardiac arrest."
+  },
+  {
+    "id": "mcq104",
+    "scenario": "You are assessing a patient with a suspected heat stroke. The patient is confused, has hot and dry skin, and a core body temperature of 105\u00b0F (40.6\u00b0C).",
+    "question": "What is the MOST critical prehospital intervention?",
+    "options": [
+      "Administer oral fluids.",
+      "Move the patient to a cooler environment and begin active cooling measures.",
+      "Administer acetaminophen to lower the fever.",
+      "Encourage the patient to shiver."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Heat stroke is a life-threatening emergency characterized by a core body temperature >104\u00b0F (40\u00b0C) and altered mental status. The most critical intervention is to move the patient to a cooler environment and immediately begin active cooling measures (e.g., cold packs to groin/axillae, misting with water and fanning).",
+    "feedbackIncorrect": "Oral fluids are contraindicated in an altered patient. Acetaminophen is ineffective for heat stroke as the thermoregulatory center is overwhelmed, not reset. Shivering would generate more heat and is not desired."
+  },
+  {
+    "id": "mcq105",
+    "scenario": "A 6-month-old infant presents with a sudden onset of high fever, poor feeding, and a non-blanching petechial rash. The infant is lethargic.",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital concern?",
+    "options": [
+      "Viral exanthem; supportive care.",
+      "Bacterial sepsis/meningitis; rapid transport and consider early fluid boluses.",
+      "Allergic reaction; administer diphenhydramine.",
+      "Child abuse; ensure scene safety and document findings."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "High fever, lethargy, and a non-blanching petechial rash in an infant are highly concerning for bacterial sepsis or meningitis, which can rapidly progress to septic shock. Rapid transport and early fluid boluses are critical interventions.",
+    "feedbackIncorrect": "Viral exanthems typically blanch. Allergic reactions would present with hives (urticaria) that blanch. While child abuse should always be considered, the clinical picture points more strongly to a severe infection."
+  },
+  {
+    "id": "mcq106",
+    "scenario": "You are treating a patient with a suspected tension pneumothorax. After performing a needle decompression, you notice a sudden improvement in the patient's respiratory distress and blood pressure. However, you now hear gurgling sounds over the epigastrium with each ventilation.",
+    "question": "What is the MOST likely complication of the needle decompression?",
+    "options": [
+      "Hemothorax",
+      "Cardiac tamponade",
+      "Esophageal intubation",
+      "Gastric perforation"
+    ],
+    "correctAnswerIndex": 3,
+    "feedbackCorrect": "Gurgling sounds over the epigastrium with ventilations after a needle decompression suggest that the needle may have perforated the stomach or esophagus, especially if inserted too low or too medially. This is a serious complication.",
+    "feedbackIncorrect": "Hemothorax would present with signs of bleeding. Cardiac tamponade would present with Beck's triad. Esophageal intubation would be a complication of airway management, not needle decompression."
+  },
+  {
+    "id": "mcq107",
+    "scenario": "A 40-year-old male is found unresponsive with a blood glucose of 30 mg/dL. He has a history of insulin-dependent diabetes. His family states he has been drinking heavily.",
+    "question": "What is the MOST appropriate intervention if IV access cannot be established?",
+    "options": [
+      "Administer oral glucose paste.",
+      "Administer 1 mg Glucagon IM.",
+      "Administer 25 grams Dextrose 50% IV.",
+      "Transport immediately."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For an unresponsive hypoglycemic patient without IV access, intramuscular (IM) glucagon is the most appropriate intervention. Oral glucose is contraindicated due to aspiration risk. While attempting IV access is important, glucagon can be given more rapidly.",
+    "feedbackIncorrect": "Oral glucose is contraindicated. While attempting IV access is important, glucagon can be given more rapidly. Transport is necessary, but treatment should not be delayed."
+  },
+  {
+    "id": "mcq108",
+    "scenario": "You are assessing a patient with a suspected stroke. The patient's family states the symptoms started 6 hours ago.",
+    "question": "Given the time of symptom onset, what is the MOST likely reason this patient would NOT be a candidate for thrombolytic therapy (tPA)?",
+    "options": [
+      "The patient's age.",
+      "The patient's symptoms are too severe.",
+      "The time window for tPA administration has likely passed.",
+      "The patient's blood pressure is too high."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "The critical time window for administering thrombolytic therapy (tPA) for ischemic stroke is typically 3 hours from symptom onset, which can be extended to 4.5 hours in select patients. At 6 hours, the time window has likely passed, making the patient ineligible for tPA.",
+    "feedbackIncorrect": "Age is not an absolute contraindication for tPA. Symptom severity is not a contraindication. While blood pressure must be controlled, it is not the primary reason for ineligibility at 6 hours."
+  },
+  {
+    "id": "mcq109",
+    "scenario": "A 20-year-old male was involved in a high-speed motor vehicle collision. He is unconscious, has unequal pupils, and exhibits decorticate posturing. His blood pressure is 180/90, heart rate is 60, and respirations are irregular.",
+    "question": "What is this constellation of signs called, and what does it indicate?",
+    "options": [
+      "Neurogenic shock; spinal cord injury.",
+      "Cushing's triad; increased intracranial pressure.",
+      "Beck's triad; cardiac tamponade.",
+      "Shock; hypovolemia."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The combination of hypertension, bradycardia, and irregular respirations (Cheyne-Stokes or ataxic) is known as Cushing's triad. This triad is a classic sign of significantly increased intracranial pressure (ICP), often seen in severe traumatic brain injury.",
+    "feedbackIncorrect": "Neurogenic shock presents with hypotension and bradycardia (or normal heart rate). Beck's triad (muffled heart tones, JVD, narrowing pulse pressure) is for cardiac tamponade. Shock is a general term for inadequate tissue perfusion."
+  },
+  {
+    "id": "mcq110",
+    "scenario": "You are treating a patient with a suspected tension pneumothorax. After performing a needle decompression, you hear a sudden rush of air, and the patient's respiratory distress improves. However, the patient remains hypotensive. What is the MOST likely reason for persistent hypotension?",
+    "question": "What is the MOST likely reason for persistent hypotension after a successful needle decompression?",
+    "options": [
+      "The patient has developed a hemothorax.",
+      "The patient has developed a cardiac tamponade.",
+      "The patient has underlying hypovolemic shock.",
+      "The needle decompression was not truly successful."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "While a needle decompression may relieve the tension pneumothorax, the patient may have underlying hypovolemic shock from other injuries (e.g., internal bleeding from trauma). Therefore, persistent hypotension after a successful decompression should prompt a search for other causes of shock.",
+    "feedbackIncorrect": "If the decompression was successful, a hemothorax or cardiac tamponade would present with their own distinct signs. If the decompression was not truly successful, there would be no rush of air or improvement in respiratory distress."
+  },
+  {
+    "id": "mcq111",
+    "scenario": "A 68-year-old female with a history of diabetes and hypertension presents with sudden onset of severe abdominal pain, nausea, and vomiting. On examination, her abdomen is distended and tender, and she has absent bowel sounds. She has a history of abdominal surgery.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Appendicitis",
+      "Cholecystitis",
+      "Bowel obstruction",
+      "Diverticulitis"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden onset of severe abdominal pain, distention, nausea, vomiting, and absent bowel sounds, especially in a patient with a history of abdominal surgery (which can cause adhesions), is highly suggestive of a bowel obstruction.",
+    "feedbackIncorrect": "Appendicitis typically presents with localized right lower quadrant pain. Cholecystitis presents with right upper quadrant pain. Diverticulitis presents with lower left quadrant pain."
+  },
+  {
+    "id": "mcq112",
+    "scenario": "You are treating a patient with a suspected stroke. The patient is receiving oxygen via nasal cannula at 2 L/min, and their SpO2 is 94%. What is the MOST appropriate oxygen management strategy?",
+    "question": "What is the MOST appropriate oxygen management strategy for a suspected stroke patient with an SpO2 of 94%?",
+    "options": [
+      "Increase oxygen to 15 L/min via non-rebreather mask.",
+      "Maintain oxygen at 2 L/min via nasal cannula.",
+      "Discontinue oxygen.",
+      "Administer CPAP."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "For stroke patients, the goal is to maintain an SpO2 of 94-98%. If the patient is already at 94% on 2 L/min nasal cannula, maintaining this level is appropriate. Over-oxygenation (hyperoxia) can be detrimental in stroke patients.",
+    "feedbackIncorrect": "Increasing oxygen to 15 L/min would likely lead to hyperoxia, which is harmful in stroke. Discontinuing oxygen would lead to hypoxia. CPAP is not indicated for routine stroke management."
+  },
+  {
+    "id": "mcq113",
+    "scenario": "A 25-year-old female presents with sudden onset of severe shortness of breath, chest pain, and anxiety. She recently took a long-haul flight. Her vital signs are stable, and lung sounds are clear.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Anxiety attack",
+      "Pneumonia",
+      "Pulmonary embolism",
+      "Spontaneous pneumothorax"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden onset of shortness of breath and chest pain, especially after prolonged immobility (like a long flight), with clear lung sounds, is highly suggestive of a pulmonary embolism. Anxiety is a common secondary symptom.",
+    "feedbackIncorrect": "While an anxiety attack can cause similar symptoms, the history of a long flight points to PE. Pneumonia would have abnormal lung sounds and often a fever. Spontaneous pneumothorax would have diminished breath sounds on one side."
+  },
+  {
+    "id": "mcq114",
+    "scenario": "You are treating a patient with a suspected opioid overdose. After administering naloxone, the patient becomes responsive but remains combative and refuses further treatment. What is your primary concern?",
+    "question": "What is your primary concern when a naloxone-reversed patient becomes combative and refuses further treatment?",
+    "options": [
+      "The patient may become unresponsive again due to the short half-life of naloxone.",
+      "The patient may have other underlying medical conditions.",
+      "The patient may become violent and harm the EMS crew.",
+      "The patient may have a head injury."
+    ],
+    "correctAnswerIndex": 0,
+    "feedbackCorrect": "Naloxone has a shorter half-life than most opioids. Therefore, a patient who has been reversed with naloxone is at high risk of becoming unresponsive and experiencing respiratory depression again once the naloxone wears off. This is the primary concern, and continued monitoring and transport are crucial.",
+    "feedbackIncorrect": "While other medical conditions, violence, and head injury are possibilities, the most immediate and common concern after naloxone reversal is the recurrence of opioid effects due to naloxone's short half-life."
+  },
+  {
+    "id": "mcq117",
+    "scenario": "A 16-year-old female presents with sudden onset of severe, sharp, unilateral lower abdominal pain. She is pale and lightheaded. Her last menstrual period was 3 weeks ago.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Appendicitis",
+      "Ovarian torsion",
+      "Ectopic pregnancy",
+      "Urinary tract infection"
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Sudden onset of severe, sharp, unilateral lower abdominal pain, especially with pallor and lightheadedness, in a female of childbearing age, is highly suggestive of ovarian torsion (twisting of the ovary). While ectopic pregnancy is also a consideration, the sharp, sudden nature often points to torsion.",
+    "feedbackIncorrect": "Appendicitis pain typically starts periumbilical and migrates. Ectopic pregnancy would be more likely with a missed period. UTI would present with dysuria and frequency."
+  },
+  {
+    "id": "mcq118",
+    "scenario": "You are treating a patient with a suspected anaphylactic reaction. After administering epinephrine, the patient's respiratory distress improves, but they remain hypotensive. What is the MOST appropriate next intervention?",
+    "question": "What is the MOST appropriate next intervention for an anaphylactic patient who remains hypotensive after epinephrine?",
+    "options": [
+      "Administer another dose of epinephrine.",
+      "Administer a large volume IV fluid bolus.",
+      "Administer diphenhydramine.",
+      "Administer a vasopressor infusion."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "After epinephrine, if hypotension persists in anaphylaxis, the next critical step is to administer a large volume IV fluid bolus. Anaphylaxis causes massive vasodilation and capillary leak, leading to significant intravascular volume depletion. Fluid resuscitation is essential to restore blood pressure.",
+    "feedbackIncorrect": "While a second dose of epinephrine may be needed, addressing the profound hypovolemia with fluids is often the next priority. Diphenhydramine is an antihistamine and does not address hypotension. Vasopressor infusions are typically hospital-level interventions."
+  },
+  {
+    "id": "mcq119",
+    "scenario": "A 75-year-old male with a history of COPD is found unresponsive. His family states he has been increasingly lethargic. His respiratory rate is 6 breaths per minute, and his SpO2 is 80% on room air. He has a barrel chest and clubbing of his fingers.",
+    "question": "What is the MOST likely cause of his unresponsiveness?",
+    "options": [
+      "Hypoglycemia",
+      "Opioid overdose",
+      "Acute hypercapnic respiratory failure",
+      "Acute myocardial infarction"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "In a patient with severe COPD, chronic CO2 retention can lead to a blunted respiratory drive. An acute exacerbation or worsening of his condition can lead to acute hypercapnic respiratory failure, where rising CO2 levels cause altered mental status and unresponsiveness. The low respiratory rate and SpO2 support this.",
+    "feedbackIncorrect": "While hypoglycemia and opioid overdose can cause unresponsiveness, the patient's history of COPD and signs of chronic respiratory disease point to hypercapnic respiratory failure. AMI would present with cardiac symptoms."
+  },
+  {
+    "id": "mcq120",
+    "scenario": "You are treating a patient with a severe burn to their arm. The burn is full-thickness and covers the entire circumference of the arm. What is the primary concern with this type of burn?",
+    "question": "What is the primary concern with a full-thickness circumferential burn to an extremity?",
+    "options": [
+      "Infection",
+      "Fluid loss",
+      "Compartment syndrome",
+      "Pain management"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "A full-thickness circumferential burn to an extremity can act like a tourniquet as the edema forms underneath the non-elastic eschar. This can lead to compartment syndrome, compromising circulation to the distal extremity. This is a surgical emergency requiring escharotomy.",
+    "feedbackIncorrect": "While infection, fluid loss, and pain management are important in burn care, compartment syndrome is the most immediate and limb-threatening concern for a circumferential burn."
+  },
+  {
+    "id": "mcq121",
+    "scenario": "A 30-year-old female presents with sudden onset of severe, sharp, unilateral flank pain radiating to her groin. She is nauseated and restless. She has a history of similar episodes.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Appendicitis",
+      "Ectopic pregnancy",
+      "Kidney stones (renal calculi)",
+      "Ovarian cyst rupture"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden onset of severe, sharp, unilateral flank pain radiating to the groin, often accompanied by nausea and restlessness, is classic for kidney stones (renal calculi). The history of similar episodes further supports this diagnosis.",
+    "feedbackIncorrect": "Appendicitis pain typically starts periumbilical and migrates to the right lower quadrant. Ectopic pregnancy would be more likely with a missed period and vaginal bleeding. Ovarian cyst rupture can cause sudden pain but less commonly radiates to the groin in this specific pattern."
+  },
+  {
+    "id": "mcq122",
+    "scenario": "You are assessing a patient with a suspected stroke. The patient's blood glucose is 120 mg/dL. The patient is unable to follow commands. What is the MOST appropriate next step?",
+    "question": "What is the MOST appropriate next step for a suspected stroke patient who is unable to follow commands and has a normal blood glucose?",
+    "options": [
+      "Administer aspirin.",
+      "Transport immediately to a stroke center.",
+      "Perform a detailed neurological exam.",
+      "Administer oxygen via non-rebreather mask."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Once hypoglycemia has been ruled out as a stroke mimic, and the patient presents with acute neurological deficits, rapid transport to a stroke center is the most critical next step. Time is brain, and definitive treatment (e.g., tPA, thrombectomy) is time-sensitive.",
+    "feedbackIncorrect": "Aspirin is contraindicated until a hemorrhagic stroke is ruled out by CT scan. A detailed neurological exam can be performed en route or at the hospital. Oxygen should be administered to maintain SpO2 >94%, but it's not the primary next step if the patient is already oxygenating well."
+  },
+  {
+    "id": "mcq123",
+    "scenario": "A 4-year-old child presents with a sudden onset of inspiratory stridor, barking cough, and hoarseness. The child has a low-grade fever. The parents report the symptoms worsened at night.",
+    "question": "What is the MOST likely diagnosis, and what is the appropriate prehospital management?",
+    "options": [
+      "Epiglottitis; avoid disturbing the child and transport rapidly.",
+      "Croup (laryngotracheobronchitis); administer humidified oxygen and consider nebulized epinephrine.",
+      "Bacterial tracheitis; administer antibiotics and secure the airway.",
+      "Foreign body aspiration; perform back blows/chest thrusts."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The classic presentation of inspiratory stridor, barking cough, hoarseness, and low-grade fever, especially worsening at night, is indicative of croup. Humidified oxygen helps soothe the airway, and nebulized epinephrine can reduce airway edema.",
+    "feedbackIncorrect": "Epiglottitis presents with high fever, drooling, and muffled voice, not a barking cough. Bacterial tracheitis is less common and more severe. Foreign body aspiration would have a sudden onset without a preceding illness."
+  },
+  {
+    "id": "mcq124",
+    "scenario": "A 60-year-old male with a history of hypertension and hyperlipidemia presents with sudden onset of severe, tearing chest pain radiating to his back. He has a difference in blood pressure between his arms.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Acute myocardial infarction",
+      "Pulmonary embolism",
+      "Aortic dissection",
+      "Pericarditis"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden, severe, tearing chest pain radiating to the back with a difference in blood pressure between the arms is the classic presentation of an aortic dissection.",
+    "feedbackIncorrect": "AMI typically presents with crushing substernal pain. Pulmonary embolism can cause pleuritic chest pain and shortness of breath. Pericarditis presents with sharp chest pain that is often relieved by leaning forward."
+  },
+  {
+    "id": "mcq125",
+    "scenario": "You are assessing a patient with a suspected tension pneumothorax. Which of the following physical findings is the LEAST reliable indicator of a tension pneumothorax in the prehospital setting?",
+    "options": [
+      "Absent breath sounds on the affected side.",
+      "Tracheal deviation away from the affected side.",
+      "Jugular vein distention (JVD).",
+      "Hypotension."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Tracheal deviation is a late and often subtle sign of tension pneumothorax and can be difficult to assess accurately in the prehospital setting, especially in a moving ambulance or with a short neck. Absent breath sounds, JVD, and hypotension are more reliable indicators.",
+    "feedbackIncorrect": "Absent breath sounds, JVD, and hypotension are all reliable indicators of a tension pneumothorax. Tracheal deviation is a late and often difficult-to-assess sign."
+  },
+  {
+    "id": "mcq126",
+    "scenario": "A 25-year-old female presents with sudden onset of severe lower abdominal pain, vaginal bleeding, and dizziness. She is pale and tachycardic. Her last menstrual period was 8 weeks ago.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Miscarriage",
+      "Pelvic inflammatory disease (PID)",
+      "Ectopic pregnancy",
+      "Ovarian cyst rupture"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden, severe lower abdominal pain, vaginal bleeding, dizziness, and signs of hypovolemia (pallor, tachycardia) in a female of childbearing age with a missed period are classic signs of a ruptured ectopic pregnancy.",
+    "feedbackIncorrect": "Miscarriage would present with vaginal bleeding and cramping, but typically not severe unilateral pain and signs of hypovolemic shock. PID presents with lower abdominal pain, fever, and vaginal discharge. Ovarian cyst rupture can cause sudden pain but less commonly presents with significant hypovolemia."
+  },
+  {
+    "id": "mcq127",
+    "scenario": "You are treating a patient with a severe head injury. The patient exhibits decerebrate posturing. What does this indicate?",
+    "question": "What does decerebrate posturing indicate?",
+    "options": [
+      "Damage to the cerebral hemispheres.",
+      "Damage to the brainstem, specifically below the red nucleus.",
+      "Damage to the spinal cord.",
+      "Damage to the cerebellum."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Decerebrate posturing (extension of all four extremities) indicates severe damage to the brainstem, specifically below the red nucleus. This is a more ominous sign than decorticate posturing.",
+    "feedbackIncorrect": "Decorticate posturing indicates damage to the cerebral hemispheres (above the red nucleus). Damage to the spinal cord would cause paralysis below the injury. Damage to the cerebellum primarily affects coordination and balance."
+  },
+  {
+    "id": "mcq128",
+    "scenario": "A 5-year-old child presents with a sudden onset of high fever, petechial rash, and altered mental status. The parents report the child has been lethargic and irritable.",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital concern?",
+    "options": [
+      "Viral infection; supportive care.",
+      "Bacterial meningitis; rapid transport and consider droplet precautions.",
+      "Sepsis; administer IV fluids.",
+      "Febrile seizure; protect the airway."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "High fever, petechial rash, and altered mental status in a child are classic signs of bacterial meningitis, a life-threatening infection. Rapid transport is crucial, and droplet precautions should be considered to protect healthcare providers.",
+    "feedbackIncorrect": "While viral infections are common, the petechial rash and altered mental status point to a more severe bacterial infection. Sepsis is a possibility, but meningitis is a more specific diagnosis given the signs. Febrile seizures typically do not present with a petechial rash."
+  },
+  {
+    "id": "mcq129",
+    "scenario": "You are assessing a patient with a suspected CVA (stroke). The patient is unable to move their right arm or leg. You note that the patient's eyes are deviated to the left.",
+    "question": "What does the eye deviation indicate in this stroke patient?",
+    "options": [
+      "The stroke is in the right hemisphere.",
+      "The stroke is in the left hemisphere.",
+      "The stroke is in the brainstem.",
+      "The patient is experiencing a seizure."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "In a stroke patient, eye deviation typically occurs towards the side of the brain lesion and away from the paralyzed side. Since the patient has right-sided weakness (indicating a left hemisphere stroke), the eyes would deviate to the left.",
+    "feedbackIncorrect": "Eye deviation to the right would indicate a right hemisphere stroke. Brainstem strokes can cause various eye movement abnormalities but not typically this pattern. Seizures can cause eye deviation, but the primary presentation is stroke."
+  },
+  {
+    "id": "mcq132",
+    "scenario": "You are assessing a patient with a suspected stroke. The patient's blood pressure is 200/110. What is the MOST appropriate initial management of their blood pressure in the prehospital setting?",
+    "question": "What is the MOST appropriate initial management of blood pressure in a suspected stroke patient in the prehospital setting?",
+    "options": [
+      "Aggressively lower the blood pressure to normal limits immediately.",
+      "Administer a beta-blocker to lower the heart rate and blood pressure.",
+      "Allow for permissive hypertension unless the systolic blood pressure exceeds 220 mmHg or diastolic exceeds 120 mmHg.",
+      "Administer a diuretic to reduce fluid volume and blood pressure."
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "In acute ischemic stroke, permissive hypertension is generally recommended in the prehospital setting unless the systolic blood pressure exceeds 220 mmHg or the diastolic exceeds 120 mmHg. This is because the brain may be relying on higher pressures to maintain perfusion through compromised vessels. Aggressive lowering can worsen cerebral ischemia.",
+    "feedbackIncorrect": "Aggressively lowering of blood pressure can worsen stroke outcomes. Beta-blockers and diuretics are not typically first-line for acute stroke hypertension in the prehospital setting."
+  },
+  {
+    "id": "mcq133",
+    "scenario": "A 16-year-old female presents with sudden onset of severe, sharp, unilateral lower abdominal pain. She is pale and lightheaded. Her last menstrual period was 3 weeks ago.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Appendicitis",
+      "Ovarian torsion",
+      "Ectopic pregnancy",
+      "Urinary tract infection"
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Sudden onset of severe, sharp, unilateral lower abdominal pain, especially with pallor and lightheadedness, in a female of childbearing age, is highly suggestive of ovarian torsion (twisting of the ovary). While ectopic pregnancy is also a consideration, the sharp, sudden nature often points to torsion.",
+    "feedbackIncorrect": "Appendicitis pain typically starts periumbilical and migrates. Ectopic pregnancy would be more likely with a missed period. UTI would present with dysuria and frequency."
+  },
+  {
+    "id": "mcq134",
+    "scenario": "You are treating a patient with a suspected anaphylactic reaction. After administering epinephrine, the patient's respiratory distress improves, but they remain hypotensive. What is the MOST appropriate next intervention?",
+    "question": "What is the MOST appropriate next intervention for an anaphylactic patient who remains hypotensive after epinephrine?",
+    "options": [
+      "Administer another dose of epinephrine.",
+      "Administer a large volume IV fluid bolus.",
+      "Administer diphenhydramine.",
+      "Administer a vasopressor infusion."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "After epinephrine, if hypotension persists in anaphylaxis, the next critical step is to administer a large volume IV fluid bolus. Anaphylaxis causes massive vasodilation and capillary leak, leading to significant intravascular volume depletion. Fluid resuscitation is essential to restore blood pressure.",
+    "feedbackIncorrect": "While a second dose of epinephrine may be needed, addressing the profound hypovolemia with fluids is often the next priority. Diphenhydramine is an antihistamine and does not address hypotension. Vasopressor infusions are typically hospital-level interventions."
+  },
+  {
+    "id": "mcq135",
+    "scenario": "A 75-year-old male with a history of COPD is found unresponsive. His family states he has been increasingly lethargic. His respiratory rate is 6 breaths per minute, and his SpO2 is 80% on room air. He has a barrel chest and clubbing of his fingers.",
+    "question": "What is the MOST likely cause of his unresponsiveness?",
+    "options": [
+      "Hypoglycemia",
+      "Opioid overdose",
+      "Acute hypercapnic respiratory failure",
+      "Acute myocardial infarction"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "In a patient with severe COPD, chronic CO2 retention can lead to a blunted respiratory drive. An acute exacerbation or worsening of his condition can lead to acute hypercapnic respiratory failure, where rising CO2 levels cause altered mental status and unresponsiveness. The low respiratory rate and SpO2 support this.",
+    "feedbackIncorrect": "While hypoglycemia and opioid overdose can cause unresponsiveness, the patient's history of COPD and signs of chronic respiratory disease point to hypercapnic respiratory failure. AMI would present with cardiac symptoms."
+  },
+  {
+    "id": "mcq136",
+    "scenario": "You are treating a patient with a severe burn to their arm. The burn is full-thickness and covers the entire circumference of the arm. What is the primary concern with this type of burn?",
+    "question": "What is the primary concern with a full-thickness circumferential burn to an extremity?",
+    "options": [
+      "Infection",
+      "Fluid loss",
+      "Compartment syndrome",
+      "Pain management"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "A full-thickness circumferential burn to an extremity can act like a tourniquet as the edema forms underneath the non-elastic eschar. This can lead to compartment syndrome, compromising circulation to the distal extremity. This is a surgical emergency requiring escharotomy.",
+    "feedbackIncorrect": "While infection, fluid loss, and pain management are important in burn care, compartment syndrome is the most immediate and limb-threatening concern for a circumferential burn."
+  },
+  {
+    "id": "mcq137",
+    "scenario": "A 30-year-old female presents with sudden onset of severe, sharp, unilateral flank pain radiating to her groin. She is nauseated and restless. She has a history of similar episodes.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Appendicitis",
+      "Ectopic pregnancy",
+      "Kidney stones (renal calculi)",
+      "Ovarian cyst rupture"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden onset of severe, sharp, unilateral flank pain radiating to the groin, often accompanied by nausea and restlessness, is classic for kidney stones (renal calculi). The history of similar episodes further supports this diagnosis.",
+    "feedbackIncorrect": "Appendicitis pain typically starts periumbilical and migrates to the right lower quadrant. Ectopic pregnancy would be more likely with a missed period and vaginal bleeding. Ovarian cyst rupture can cause sudden pain but less commonly radiates to the groin in this specific pattern."
+  },
+  {
+    "id": "mcq138",
+    "scenario": "You are assessing a patient with a suspected stroke. The patient's blood glucose is 120 mg/dL. The patient is unable to follow commands. What is the MOST appropriate next step?",
+    "question": "What is the MOST appropriate next step for a suspected stroke patient who is unable to follow commands and has a normal blood glucose?",
+    "options": [
+      "Administer aspirin.",
+      "Transport immediately to a stroke center.",
+      "Perform a detailed neurological exam.",
+      "Administer oxygen via non-rebreather mask."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Once hypoglycemia has been ruled out as a stroke mimic, and the patient presents with acute neurological deficits, rapid transport to a stroke center is the most critical next step. Time is brain, and definitive treatment (e.g., tPA, thrombectomy) is time-sensitive.",
+    "feedbackIncorrect": "Aspirin is contraindicated until a hemorrhagic stroke is ruled out by CT scan. A detailed neurological exam can be performed en route or at the hospital. Oxygen should be administered to maintain SpO2 >94%, but it's not the primary next step if the patient is already oxygenating well."
+  },
+  {
+    "id": "mcq139",
+    "scenario": "A 4-year-old child presents with a sudden onset of inspiratory stridor, barking cough, and hoarseness. The child has a low-grade fever. The parents report the symptoms worsened at night.",
+    "question": "What is the MOST likely diagnosis, and what is the appropriate prehospital management?",
+    "options": [
+      "Epiglottitis; avoid disturbing the child and transport rapidly.",
+      "Croup (laryngotracheobronchitis); administer humidified oxygen and consider nebulized epinephrine.",
+      "Bacterial tracheitis; administer antibiotics and secure the airway.",
+      "Foreign body aspiration; perform back blows/chest thrusts."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "The classic presentation of inspiratory stridor, barking cough, hoarseness, and low-grade fever, especially worsening at night, is indicative of croup. Humidified oxygen helps soothe the airway, and nebulized epinephrine can reduce airway edema.",
+    "feedbackIncorrect": "Epiglottitis presents with high fever, drooling, and muffled voice, not a barking cough. Bacterial tracheitis is less common and more severe. Foreign body aspiration would have a sudden onset without a preceding illness."
+  },
+  {
+    "id": "mcq140",
+    "scenario": "A 60-year-old male with a history of hypertension and hyperlipidemia presents with sudden onset of severe, tearing chest pain radiating to his back. He has a difference in blood pressure between his arms.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Acute myocardial infarction",
+      "Pulmonary embolism",
+      "Aortic dissection",
+      "Pericarditis"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden, severe, tearing chest pain radiating to the back with a difference in blood pressure between the arms is the classic presentation of an aortic dissection.",
+    "feedbackIncorrect": "AMI typically presents with crushing substernal pain. Pulmonary embolism can cause pleuritic chest pain and shortness of breath. Pericarditis presents with sharp chest pain that is often relieved by leaning forward."
+  },
+  {
+    "id": "mcq141",
+    "scenario": "You are assessing a patient with a suspected tension pneumothorax. Which of the following physical findings is the LEAST reliable indicator of a tension pneumothorax in the prehospital setting?",
+    "question": "What is the LEAST reliable indicator of a tension pneumothorax in the prehospital setting?",
+    "options": [
+      "Absent breath sounds on the affected side.",
+      "Tracheal deviation away from the affected side.",
+      "Jugular vein distention (JVD).",
+      "Hypotension."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Tracheal deviation is a late and often subtle sign of tension pneumothorax and can be difficult to assess accurately in the prehospital setting, especially in a moving ambulance or with a short neck. Absent breath sounds, JVD, and hypotension are more reliable indicators.",
+    "feedbackIncorrect": "Absent breath sounds, JVD, and hypotension are all reliable indicators of a tension pneumothorax. Tracheal deviation is a late and often difficult-to-assess sign."
+  },
+  {
+    "id": "mcq142",
+    "scenario": "A 25-year-old female presents with sudden onset of severe lower abdominal pain, vaginal bleeding, and dizziness. She is pale and tachycardic. Her last menstrual period was 8 weeks ago.",
+    "question": "What is the MOST likely diagnosis?",
+    "options": [
+      "Miscarriage",
+      "Pelvic inflammatory disease (PID)",
+      "Ectopic pregnancy",
+      "Ovarian cyst rupture"
+    ],
+    "correctAnswerIndex": 2,
+    "feedbackCorrect": "Sudden, severe lower abdominal pain, vaginal bleeding, dizziness, and signs of hypovolemia (pallor, tachycardia) in a female of childbearing age with a missed period are classic signs of a ruptured ectopic pregnancy.",
+    "feedbackIncorrect": "Miscarriage would present with vaginal bleeding and cramping, but typically not severe unilateral pain and signs of hypovolemic shock. PID presents with lower abdominal pain, fever, and vaginal discharge. Ovarian cyst rupture can cause sudden pain but less commonly presents with significant hypovolemia."
+  },
+  {
+    "id": "mcq143",
+    "scenario": "You are treating a patient with a severe head injury. The patient exhibits decerebrate posturing. What does this indicate?",
+    "question": "What does decerebrate posturing indicate?",
+    "options": [
+      "Damage to the cerebral hemispheres.",
+      "Damage to the brainstem, specifically below the red nucleus.",
+      "Damage to the spinal cord.",
+      "Damage to the cerebellum."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "Decerebrate posturing (extension of all four extremities) indicates severe damage to the brainstem, specifically below the red nucleus. This is a more ominous sign than decorticate posturing.",
+    "feedbackIncorrect": "Decorticate posturing indicates damage to the cerebral hemispheres (above the red nucleus). Damage to the spinal cord would cause paralysis below the injury. Damage to the cerebellum primarily affects coordination and balance."
+  },
+  {
+    "id": "mcq144",
+    "scenario": "A 5-year-old child presents with a sudden onset of high fever, petechial rash, and altered mental status. The parents report the child has been lethargic and irritable.",
+    "question": "What is the MOST likely diagnosis, and what is the primary prehospital concern?",
+    "options": [
+      "Viral infection; supportive care.",
+      "Bacterial meningitis; rapid transport and consider droplet precautions.",
+      "Sepsis; administer IV fluids.",
+      "Febrile seizure; protect the airway."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "High fever, petechial rash, and altered mental status in a child are classic signs of bacterial meningitis, a life-threatening infection. Rapid transport is crucial, and droplet precautions should be considered to protect healthcare providers.",
+    "feedbackIncorrect": "While viral infections are common, the petechial rash and altered mental status point to a more severe bacterial infection. Sepsis is a possibility, but meningitis is a more specific diagnosis given the signs. Febrile seizures typically do not present with a petechial rash."
+  },
+  {
+    "id": "mcq145",
+    "scenario": "You are assessing a patient with a suspected CVA (stroke). The patient is unable to move their right arm or leg. You note that the patient's eyes are deviated to the left.",
+    "question": "What does the eye deviation indicate in this stroke patient?",
+    "options": [
+      "The stroke is in the right hemisphere.",
+      "The stroke is in the left hemisphere.",
+      "The stroke is in the brainstem.",
+      "The patient is experiencing a seizure."
+    ],
+    "correctAnswerIndex": 1,
+    "feedbackCorrect": "In a stroke patient, eye deviation typically occurs towards the side of the brain lesion and away from the paralyzed side. Since the patient has right-sided weakness (indicating a left hemisphere stroke), the eyes would deviate to the left.",
+    "feedbackIncorrect": "Eye deviation to the right would indicate a right hemisphere stroke. Brainstem strokes can cause various eye movement abnormalities but not typically this pattern. Seizures can cause eye deviation, but the primary presentation is stroke."
+  }
+];
+
+function NREMTMultipleChoiceQuestion(questionData) {
+  const container = document.getElementById('questions-container');
+  const questionHtml = `
+    <div class="app">
+      <div class="card">
+        <span class="badge">Multiple Choice · NREMT Practice</span>
+        <div class="scenario">${questionData.scenario}</div>
+        <div class="question-text">${questionData.question}</div>
+        <div class="options-list" id="options-list-${questionData.id}"></div>
+
+        <button class="primary" id="submitBtn-${questionData.id}">Submit Answer</button>
+        <button class="secondary" id="resetBtn-${questionData.id}">Reset Question</button>
+
+        <div class="feedback" id="feedback-${questionData.id}">
+          <span class="label" id="fbLabel-${questionData.id}"></span>
+          <span id="fbText-${questionData.id}"></span>
+        </div>
+      </div>
+    </div>
+  `;
+  container.insertAdjacentHTML('beforeend', questionHtml);
+
+  const optionsListEl = document.getElementById(`options-list-${questionData.id}`);
+  const submitBtn = document.getElementById(`submitBtn-${questionData.id}`);
+  const resetBtn = document.getElementById(`resetBtn-${questionData.id}`);
+  const feedbackEl = document.getElementById(`feedback-${questionData.id}`);
+  const fbLabelEl = document.getElementById(`fbLabel-${questionData.id}`);
+  const fbTextEl = document.getElementById(`fbText-${questionData.id}`);
+
+  let selectedOptionIndex = -1;
+  let submitted = false;
+
+  function renderOptions() {
+    optionsListEl.innerHTML = '';
+    questionData.options.forEach((option, index) => {
+      const optionItem = document.createElement('label');
+      optionItem.className = 'option-item';
+      optionItem.innerHTML = `
+        <input type="radio" name="${questionData.id}" value="${index}" ${selectedOptionIndex === index ? 'checked' : ''} ${submitted ? 'disabled' : ''}>
+        ${option}
+      `;
+      if (submitted) {
+        if (index === questionData.correctAnswerIndex) {
+          optionItem.classList.add('correct');
+        } else if (index === selectedOptionIndex) {
+          optionItem.classList.add('incorrect');
+        }
+      } else if (index === selectedOptionIndex) {
+        optionItem.classList.add('selected');
+      }
+      optionItem.addEventListener('click', () => {
+        if (!submitted) {
+          selectedOptionIndex = index;
+          renderOptions();
+        }
+      });
+      optionsListEl.appendChild(optionItem);
+    });
+    submitBtn.disabled = selectedOptionIndex === -1 || submitted;
+  }
+
+  submitBtn.addEventListener('click', () => {
+    if (selectedOptionIndex === -1) return;
+    submitted = true;
+    renderOptions();
+    submitBtn.disabled = true;
+    resetBtn.style.display = 'block';
+
+    const isCorrect = selectedOptionIndex === questionData.correctAnswerIndex;
+    feedbackEl.className = `feedback show ${isCorrect ? 'pass' : 'fail'}`;
+    fbLabelEl.textContent = isCorrect ? 'Correct Answer' : 'Incorrect Answer';
+    fbTextEl.textContent = isCorrect ? questionData.feedbackCorrect : questionData.feedbackIncorrect;
+  });
+
+  resetBtn.addEventListener('click', () => {
+    selectedOptionIndex = -1;
+    submitted = false;
+    feedbackEl.className = 'feedback';
+    resetBtn.style.display = 'none';
+    renderOptions();
+  });
+
+  renderOptions();
+  resetBtn.style.display = 'none'; // Hide reset button initially
+}
+
+// Initialize all questions
+questions.forEach(q => new NREMTMultipleChoiceQuestion(q));
+</script>
+</body>
+</html>
