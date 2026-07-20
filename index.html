@@ -3,157 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Practice Exams Dashboard</title>
+    <title>NREMT Practice Exam Dashboard</title>
     <style>
-        /* General page setup */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #F07167; /* A warm coral color */
-            color: #333333;
+            font-family: Arial, sans-serif;
+            background-color: #1a4472; /* Medium EMT Blue background */
+            color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            padding: 10px;
         }
-
-        /* Container for the menu */
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            width: 100%;
-            max-width: 950px; /* Expanded to comfortably fit 4 columns */
-            text-align: center;
-        }
-        
         h1 {
-            margin-top: 0;
-            font-size: 24px;
-            color: #222222;
-            margin-bottom: 20px;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
-
-        /* Menu item list styling - 4 columns by 5 rows grid */
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
+        .grid-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
-            grid-template-rows: repeat(5, 1fr);    /* 5 rows */
-            gap: 15px;                             /* 15px space between boxes */
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 750px;
+            height: 72vh;
+            max-height: 460px;
         }
-
-        li {
-           margin: 0;
-        }
-
-        /* Styling links to look like clean square buttons */
-        a {
+        .exam-btn {
+            background-color: #ffffff;
+            border: 2px solid #0f2c4c;
+            border-radius: 5px;
+            color: #1a4472;
+            font-size: 0.7rem;
+            font-weight: bold;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            aspect-ratio: 1 / 1;                   /* Forces the button to be a perfect square */
-            padding: 10px;
-            background-color: #0081A7;             /* Clean blue button color */
-            color: #ffffff;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            border-radius: 8px;
-            transition: background-color 0.2s ease, transform 0.1s ease;
             text-align: center;
-            box-sizing: border-box;
+            padding: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            word-break: break-word;
         }
-
-        /* Styling for images you will add inside */
-        a img {
-            width: 40px;  /* Adjust size as needed */
-            height: 40px; /* Adjust size as needed */
-            object-fit: contain;
-            margin-bottom: 8px; /* Space between image and text */
-        }
-
-        /* Interactive hover effects */
-        a:hover {
-            background-color: #00afb9; /* Lighter blue on hover */
-        }
-        
-        a:active {
-            transform: scale(0.98); /* Slight click feedback */
+        .exam-btn:hover {
+            background-color: #ffcc00;
+            color: #1a4472;
+            border-color: #cca300;
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <h1>NREMT Review Topics</h1>
-        <ul>
-            <li>
-                <a href="nremt_interactive_exam.html">
-                    <!-- <img src="icon-path.png" alt="Exam Icon"> -->
-                    Interactive Exam
-                </a>
-            </li>
-            <li>
-                <a href="nremt_multiple_choice_questions(1).html">
-                    <!-- <img src="icon-path.png" alt="MCQ Icon"> -->
-                    Practice MCQs
-                </a>
-            </li>
-            <li>
-                <a href="medical_terminology_quiz.html">
-                    <!-- <img src="icon-path.png" alt="Medical Terminology Icon"> -->
-                    Med Term
-                </a>
-            </li>
-            <li>
-                <a href="dragdrop_example-2.html">
-                    <!-- <img src="icon-path.png" alt="Drag Drop Icon"> -->
-                    Drag & Drop
-                </a>
-            </li>
-            <li>
-                <a href="nremt_opioid_overdose_question.html">
-                    <!-- <img src="icon-path.png" alt="Overdose Icon"> -->
-                    Overdose Rev
-                </a>
-            </li>
-            <li>
-                <a href="nremt_study_guide.html">
-                    <!-- <img src="icon-path.png" alt="Study Guide Icon"> -->
-                    Study Guide
-                </a>
-            </li>
-            <li>
-                <a href="nremt_simulator.html">
-                    <!-- <img src="icon-path.png" alt="Simulator Icon"> -->
-                    Simulator
-                </a>
-            </li>
-            <li>
-                <a href="blank.html">
-                    <!-- <img src="icon-path.png" alt="Placeholder Icon"> -->
-                    Placeholder
-                </a>
-            </li>
-            <li>
-                <a href="YOUR_SHARE_LINK_HERE" target="_blank">
-                    <!-- <img src="icon-path.png" alt="Slides Icon"> -->
-                    Lesson Slides
-                </a>
-            </li>
-            <!-- Add more <li><a href="...">...</a></li> elements up to 20 total slots -->
-        </ul>
+
+    <h1>NREMT Practice Exam Dashboard</h1>
+
+    <div class="grid-container">
+        <button class="exam-btn">Airway, Respiration & Ventilation</button>
+        <button class="exam-btn">Cardiology & Resuscitation</button>
+        <button class="exam-btn">Medical & Obstetrics</button>
+        <button class="exam-btn">Trauma</button>
+        <button class="exam-btn">EMS Operations</button>
+        
+        <button class="exam-btn">Pharmacology</button>
+        <button class="exam-btn">Cardiovascular Emergencies</button>
+        <button class="exam-btn">Respiratory Emergencies</button>
+        <button class="exam-btn">Neurological Emergencies</button>
+        <button class="exam-btn">Gastrointestinal & Urologic</button>
+
+        <button class="exam-btn">Endocrine & Hematologic</button>
+        <button class="exam-btn">Allergic & Anaphylactic</button>
+        <button class="exam-btn">Toxicology</button>
+        <button class="exam-btn">Behavioral Emergencies</button>
+        <button class="exam-btn">Gynecological Emergencies</button>
+
+        <button class="exam-btn">Bleeding & Shock</button>
+        <button class="exam-btn">Soft Tissue Injuries</button>
+        <button class="exam-btn">Orthopedic Injuries</button>
+        <button class="exam-btn">Head, Face & Neck</button>
+        <button class="exam-btn">Comprehensive Final Exam</button>
     </div>
+
 </body>
-    
 </html>
-<!-- force update -->
-<!-- layout update -->
