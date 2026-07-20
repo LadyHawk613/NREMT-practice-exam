@@ -27,7 +27,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             width: 100%;
-            max-width: 800px; /* Changed from 450px to 800px */
+            max-width: 950px; /* Expanded to comfortably fit 4 columns */
             text-align: center;
         }
         
@@ -35,34 +35,49 @@
             margin-top: 0;
             font-size: 24px;
             color: #222222;
+            margin-bottom: 20px;
         }
 
-        /* Menu item list styling */
+        /* Menu item list styling - 4 columns by 5 rows grid */
         ul {
             list-style-type: none;
             padding: 0;
-            margin: 20px 0 0 0;
-
-            display: grid;                 /* Activates the grid layout */
-            grid-template-columns: repeat(3, 1fr); /* Creates 3 equal columns */
-            gap: 15px;                     /* Puts 15px of space between all buttons */
-            
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
+            grid-template-rows: repeat(5, 1fr);    /* 5 rows */
+            gap: 15px;                             /* 15px space between boxes */
         }
 
         li {
-           margin: 0; /* Changed from margin-bottom: 15px */
+           margin: 0;
         }
 
-        /* Styling links to look like clean buttons */
+        /* Styling links to look like clean square buttons */
         a {
-            display: block;
-            padding: 12px 20px;
-            background-color: #0081A7; /* Clean blue button color */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1;                   /* Forces the button to be a perfect square */
+            padding: 10px;
+            background-color: #0081A7;             /* Clean blue button color */
             color: #ffffff;
             text-decoration: none;
             font-weight: bold;
-            border-radius: 6px;
+            font-size: 14px;
+            border-radius: 8px;
             transition: background-color 0.2s ease, transform 0.1s ease;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        /* Styling for images you will add inside */
+        a img {
+            width: 40px;  /* Adjust size as needed */
+            height: 40px; /* Adjust size as needed */
+            object-fit: contain;
+            margin-bottom: 8px; /* Space between image and text */
         }
 
         /* Interactive hover effects */
@@ -77,17 +92,65 @@
 </head>
 
 <body>
-    <h1>Select a Practice Exam</h1>
-    <ul>
-        <li><a href="nremt_interactive_exam.html">NREMT Interactive Exam</a></li>
-        <li><a href="nremt_multiple_choice_questions(1).html">Multiple Choice Questions</a></li>
-        <li><a href="medical_terminology_quiz.html">Medical Terminology Quiz</a></li>
-        <li><a href="dragdrop_example-2.html">Drag & Drop Example 2</a></li>
-        <li><a href="nremt_opioid_overdose_question.html">Opiod Overdose Question</a></li>
-        <li><a href="nremt_study_guide.html">Study Guide</a></li>
-        <li><a href="nremt_simulator.html">Simulator</a></li>
-        <li><a href="blank.html">Blank Place Holder</a></li>
-        <li><a href="YOUR_SHARE_LINK_HERE" target="_blank">Lesson 1 Slides (Google Slides)</a></li>
-    </ul>
+    <div class="container">
+        <h1>NREMT Review Topics</h1>
+        <ul>
+            <li>
+                <a href="nremt_interactive_exam.html">
+                    <!-- <img src="icon-path.png" alt="Exam Icon"> -->
+                    Interactive Exam
+                </a>
+            </li>
+            <li>
+                <a href="nremt_multiple_choice_questions(1).html">
+                    <!-- <img src="icon-path.png" alt="MCQ Icon"> -->
+                    Practice MCQs
+                </a>
+            </li>
+            <li>
+                <a href="medical_terminology_quiz.html">
+                    <!-- <img src="icon-path.png" alt="Medical Terminology Icon"> -->
+                    Med Term
+                </a>
+            </li>
+            <li>
+                <a href="dragdrop_example-2.html">
+                    <!-- <img src="icon-path.png" alt="Drag Drop Icon"> -->
+                    Drag & Drop
+                </a>
+            </li>
+            <li>
+                <a href="nremt_opioid_overdose_question.html">
+                    <!-- <img src="icon-path.png" alt="Overdose Icon"> -->
+                    Overdose Rev
+                </a>
+            </li>
+            <li>
+                <a href="nremt_study_guide.html">
+                    <!-- <img src="icon-path.png" alt="Study Guide Icon"> -->
+                    Study Guide
+                </a>
+            </li>
+            <li>
+                <a href="nremt_simulator.html">
+                    <!-- <img src="icon-path.png" alt="Simulator Icon"> -->
+                    Simulator
+                </a>
+            </li>
+            <li>
+                <a href="blank.html">
+                    <!-- <img src="icon-path.png" alt="Placeholder Icon"> -->
+                    Placeholder
+                </a>
+            </li>
+            <li>
+                <a href="YOUR_SHARE_LINK_HERE" target="_blank">
+                    <!-- <img src="icon-path.png" alt="Slides Icon"> -->
+                    Lesson Slides
+                </a>
+            </li>
+            <!-- Add more <li><a href="...">...</a></li> elements up to 20 total slots -->
+        </ul>
+    </div>
 </body>
 </html>
